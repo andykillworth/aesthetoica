@@ -1,0 +1,53 @@
+# Just after London midnight: finalise yesterday, write the ledger line, pull the print,
+# rebuild the pages and push to main (Cloudflare Pages deploys main).
+name: nightly
+on:
+  schedule: [{cron: "25 0 * * *"}]
+  workflow_dispatch:
+    inputs:
+      date: {description: "YYYY-MM-DD to pull (default: yesterday, London)", required: false}
+concurrency: {group: data, cancel-in-progress: false}
+permissions: {contents: write}
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with: {ref: data, path: databranch}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - uses: actions/setup-node@v4
+        with: {node-version: "20"}
+      - run: pip install -r pipeline/requirements.txt
+      - name: which day
+        id: d
+        run: echo "date=${{ inputs.date || '' }}" >> "$GITHUB_OUTPUT"
+      - name: resolve date
+        id: day
+        run: |
+          D="${{ steps.d.outputs.date }}"
+          if [ -z "$D" ]; then D=$(TZ=Europe/London date -d "yesterday" +%F); fi
+          echo "date=$D" >> "$GITHUB_OUTPUT"
+      - run: python pipeline/fetch.py --date ${{ steps.day.outputs.date }} --final
+        env: {DATA_DIR: databranch}
+      - run: python pipeline/ledger.py --date ${{ steps.day.outputs.date }}
+        env:
+          DATA_DIR: databranch
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      - run: npm install --prefix pipeline && npx --prefix pipeline playwright install --with-deps chromium
+      - run: node pipeline/render.mjs ${{ steps.day.outputs.date }}
+        env: {DATA_DIR: databranch}
+      - run: python pipeline/build.py
+        env: {DATA_DIR: databranch}
+      - name: commit data
+        working-directory: databranch
+        run: |
+          git config user.name "aesthetoica bot"; git config user.email "bot@users.noreply.github.com"
+          git add -A; git diff --cached --quiet || (git commit -m "final ${{ steps.day.outputs.date }}" && git push)
+      - name: commit pages
+        run: |
+          git config user.name "aesthetoica bot"; git config user.email "bot@users.noreply.github.com"
+          git add site/sheets site/data/index.json site/sitemap.xml site/robots.txt
+          git diff --cached --quiet || (git commit -m "sheet ${{ steps.day.outputs.date }}" && git push)

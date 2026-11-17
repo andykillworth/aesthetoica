@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="data-base" content="https://raw.githubusercontent.com/andykillworth/aesthetoica/data/">
+<meta name="description" content="A marbled sheet made each day from things that pass through Lyme Regis unseen: cosmic rays, the magnetic field, meteors, gravitational waves, the National Grid and Wikipedia.">
+<title>æsthetoica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+Double+Pica&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#1f1b18;color:#d8cdb8;font-family:'IM Fell English',Georgia,serif}
+a{color:inherit}
+#table{position:fixed;inset:0}
+#mast{position:fixed;left:5vw;top:18px;right:5vw;height:70px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+#wm{width:330px;height:70px;display:block}
+#acts{font-size:16px;color:#bfb29b;text-align:right;line-height:1.5;padding-bottom:6px}
+#acts a{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;cursor:pointer}
+#acts a:hover{color:#efe4cf}
+#sheetwrap{position:fixed;left:5vw;right:5vw;top:98px;bottom:112px;filter:drop-shadow(0 6px 14px rgba(0,0,0,.55)) drop-shadow(0 1px 1px rgba(0,0,0,.6))}
+#sheet{position:absolute;inset:0;background:#f3ecdc}
+#sheet canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#cov{pointer-events:none}
+#sheet #c2d{display:none;z-index:2}
+body.v-dark #sheet #c2d{display:block}
+body.v-dark #sheet{background:#060607;clip-path:none!important;border-radius:3px;box-shadow:inset 0 0 0 1px rgba(233,201,143,.12)}
+body.v-dark #plate{display:none}
+body.v-dark #intro{color:#ece3d3;background:radial-gradient(closest-side,rgba(6,6,8,.9),rgba(6,6,8,.75) 70%,rgba(6,6,8,0));z-index:3}
+#views{align-self:flex-end;padding-bottom:7px;font-size:17px;color:#9d917b;white-space:nowrap}
+#views .lbl{font-style:italic;font-size:15px;margin-right:6px}
+#views a{text-decoration:none;margin:0 7px;padding-bottom:2px;border-bottom:1px solid transparent}
+#views a:hover{color:#efe4cf}
+#views a.on{color:#efe4cf;border-bottom-color:#b8a98d}
+#key .k{display:contents}
+body:not(.v-ink) #key .k-ink,body:not(.v-cloud) #key .k-cloud,body:not(.v-drum) #key .k-drum{display:none}
+#intro{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);width:min(560px,84%);text-align:center;color:#33261c;pointer-events:none;transition:opacity 1.6s;padding:26px 30px;background:radial-gradient(closest-side,rgba(243,236,220,.94),rgba(243,236,220,.82) 70%,rgba(243,236,220,0))}
+#intro .a{font-size:30px;line-height:1.2;margin:0 0 10px}
+#intro .b{font-style:italic;font-size:18px;line-height:1.4;margin:0}
+#intro.gone{opacity:0}
+@media(max-width:760px){#intro .a{font-size:23px}#intro .b{font-size:15.5px}}
+.crop{position:fixed;width:22px;height:22px;pointer-events:none;border-color:#7d7262;border-style:solid;border-width:0}
+.crop.tl{border-right-width:1px;border-bottom-width:1px}.crop.tr{border-left-width:1px;border-bottom-width:1px}.crop.bl{border-right-width:1px;border-top-width:1px}.crop.br{border-left-width:1px;border-top-width:1px}
+#plate{position:absolute;right:28px;bottom:26px;width:230px;padding:12px 16px 11px;background:#efe6d2;color:#3a2b1f;transform:rotate(-1.2deg);box-shadow:0 1px 2px rgba(60,40,20,.35),0 0 0 1px rgba(90,60,30,.12);pointer-events:none}
+#plate:before{content:'';position:absolute;inset:4px;border:1px solid rgba(80,50,25,.55);outline:1px solid rgba(80,50,25,.25);outline-offset:-4px}
+#plate .t{font-family:'IM Fell English SC',serif;font-size:15px}
+#plate .n{font-size:26px;line-height:1.05;margin-top:2px}
+#plate .d{font-style:italic;font-size:15px;margin-top:3px;color:#5a4330}
+#key{position:fixed;left:5vw;right:5vw;bottom:14px;height:86px;display:flex;flex-wrap:wrap;gap:4px 26px;align-content:center;font-size:15px;color:#c7bba4}
+#key span{display:inline-flex;align-items:center;gap:8px}
+#key i{display:inline-block;width:13px;height:11px;border-radius:52% 48% 55% 45%/48% 56% 44% 52%;transform:rotate(var(--r,0deg))}
+#key b{font-weight:400;color:#efe4cf}
+#key .where{flex-basis:100%;font-style:italic;color:#9d917b}
+#mast a.word{color:#bfb29b}
+
+#acts a{white-space:nowrap}
+.pastnote{display:none}body.past .pastnote{display:inline}body.past .hint{display:none}
+#arch{position:fixed;inset:0;z-index:19;overflow-y:auto;background:rgba(20,17,15,.8);display:none}
+#arch.on{display:block}
+#arch .in{max-width:980px;margin:40px auto 60px;background:#f1e9d6;color:#2f241b;padding:44px 52px 50px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#arch h2{font-family:'IM Fell Double Pica',serif;font-weight:400;font-size:40px}
+#arch .sub{font-style:italic;color:#5a4634;margin:4px 0 18px;font-size:17px}
+#arch .turn{font-size:17px;margin-bottom:22px;border-bottom:1px solid #b9a588;padding-bottom:18px}
+#arch .turn input{font:inherit;font-size:16px;background:#f7f1e3;border:1px solid #b9a588;color:#2f241b;padding:3px 6px}
+#arch .turn a{text-decoration:underline;text-underline-offset:3px;cursor:pointer;margin-left:6px}
+#arch-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px 26px}
+.sh{display:grid;grid-template-columns:86px 1fr;grid-template-rows:auto auto 1fr;column-gap:14px;text-decoration:none;color:inherit}
+.sh img,.sh .sw{grid-row:1/4;width:86px;height:62px;object-fit:cover;box-shadow:0 1px 3px rgba(60,40,20,.35)}
+.sh .sw{background:radial-gradient(circle at 30% 40%,hsl(var(--h) 45% 45%/.75),transparent 45%),radial-gradient(circle at 70% 60%,hsl(calc(var(--h) + 140) 50% 40%/.7),transparent 50%),radial-gradient(circle at 55% 20%,hsl(calc(var(--h) + 60) 55% 50%/.6),transparent 40%),#efe5cf}
+.sh .no{font-size:18px}.sh .dd{font-style:italic;font-size:14.5px;color:#5a4634}
+.sh .ln{font-family:'Mrs Saint Delafield',cursive;font-size:22px;line-height:1.05;color:#2c3550;margin-top:4px}
+.sh:hover .no{text-decoration:underline}
+.sh .ln.spec{color:#4c5470}
+#arch .foot{font-size:14px;color:#6a5643;margin-top:26px;border-top:1px solid #b9a588;padding-top:10px}
+#arch .close{position:fixed;top:18px;right:5vw;color:#d8cdb8;font-size:16px;text-decoration:underline;text-underline-offset:3px;z-index:21}
+body.render #mast,body.render #key,body.render .crop,body.render #plate,body.render #pam,body.render #arch{display:none!important}
+body.render #sheetwrap{inset:0;filter:none}
+
+
+#pam{position:fixed;inset:0;z-index:20;overflow-y:auto;background:rgba(20,17,15,.72);display:none;-webkit-overflow-scrolling:touch}
+#pam.on{display:block}
+#pam .leaf{max-width:640px;margin:46px auto 60px;background:#f1e9d6;color:#2f241b;padding:64px 70px 70px;box-shadow:0 10px 30px rgba(0,0,0,.5);position:relative}
+#pam .leaf+.leaf{margin-top:-30px}
+#pam .back{position:fixed;top:18px;right:5vw;color:#d8cdb8;font-size:16px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;z-index:21}
+.tp{text-align:center;border-bottom:1px solid #8c7457;padding-bottom:34px;margin-bottom:34px}
+.tp .a{font-family:'IM Fell English SC',serif;font-size:19px}
+.tp .w{font-family:'IM Fell Double Pica',serif;font-size:66px;line-height:1;margin:8px 0 10px}
+.tp .s{font-style:italic;font-size:18px;line-height:1.4;max-width:420px;margin:0 auto}
+.tp .r{width:60px;height:1px;background:#8c7457;margin:22px auto}
+.tp .i{font-family:'IM Fell English SC',serif;font-size:15px;color:#5a4634}
+.prose p{font-size:19px;line-height:1.55;text-align:justify;hyphens:auto;margin-bottom:14px;text-indent:1.4em}
+.prose p.first{text-indent:0}
+.prose p.first:first-letter{font-family:'IM Fell Double Pica',serif;float:left;font-size:64px;line-height:.8;padding:6px 8px 0 0;color:#6b2a1f}
+.prose p.end{text-align:center;text-indent:0;font-style:italic;margin-top:26px}
+.prose em{font-style:italic}
+.ledger{background:repeating-linear-gradient(#f4ecd9 0 33px,#bfcbd6 33px 34px);padding:30px 34px 34px 92px;position:relative;margin-top:10px;box-shadow:inset 0 0 40px rgba(120,90,50,.18)}
+.ledger:before{content:'';position:absolute;left:74px;top:0;bottom:0;width:1px;background:#c9837a}
+.ledger h3{font-family:'IM Fell English SC',serif;font-weight:400;font-size:16px;color:#5a4634;margin:0 0 6px -58px;line-height:34px}
+.ent{position:relative;font-family:'Mrs Saint Delafield',cursive;font-size:30px;line-height:34px;color:#2c3550}
+.ent .d{position:absolute;left:-84px;width:70px;text-align:right;font-size:24px;color:#4a3a2a}
+.ent i{display:inline-block;width:16px;height:13px;border-radius:52% 48% 55% 45%/48% 56% 44% 52%;margin-left:8px;vertical-align:middle;opacity:.85}
+.fn{font-size:14.5px;line-height:1.45;color:#5a4634;margin-top:22px;border-top:1px solid #b9a588;padding-top:10px}
+.fn p{margin-bottom:6px}
+@media(max-width:700px){#pam .leaf{padding:40px 26px 46px;margin:60px 10px}.tp .w{font-size:46px}.ledger{padding-left:70px}.ledger:before{left:56px}.ent{font-size:25px}.ent .d{left:-66px;width:54px;font-size:20px}}
+
+@media(max-width:760px){#mast{height:54px;top:10px;align-items:flex-start;flex-direction:column;gap:2px}#wm{width:200px;height:46px}#acts{font-size:14px;text-align:left;padding:0;line-height:1.35}#views{padding:0;font-size:15px;align-self:flex-start}#key span{display:block}#views .lbl{font-size:13.5px}#views a{margin:0 12px 0 0}#acts a{margin-right:12px}#sheetwrap{left:3vw;right:3vw;top:146px;bottom:186px}#key{font-size:12.5px;height:172px;gap:1px 12px;line-height:1.3}#plate{transform:rotate(-1.2deg) scale(.82);transform-origin:right bottom}}
+</style>
+</head>
+<body>
+<div id="table"></div>
+<div id="mast"><canvas id="wm" width="660" height="140" aria-label="æsthetoica"></canvas>
+  <nav id="views"><span class="lbl">Seen as</span><a href="#" data-v="ink">Ink</a><a href="#cloud-chamber" data-v="cloud">Cloud chamber</a><a href="#magnetogram" data-v="drum">Magnetogram</a></nav>
+  <div id="acts"><span class="hint">Drag to stir. Point at any mark to see what made it.</span><span class="pastnote">An old sheet. <a href="#">Back to today’s</a></span><br>
+  <a id="wave">A wave passes</a> &nbsp; <a href="#sheets">Sheets</a> &nbsp; <a href="#on-the-word">On the word</a> &nbsp; <a id="snd">Sound off</a> &nbsp; <a id="tilt" style="display:none">Tilt the tray</a></div></div>
+<div id="sheetwrap"><div id="sheet"><canvas id="cgl"></canvas><canvas id="cov"></canvas><canvas id="c2d"></canvas><p id="err" style="display:none;position:absolute;left:30px;top:30px;max-width:520px;color:#3a2b1f;font-size:17px"></p>
+  <div id="intro"><p class="a">Nobody is marbling this sheet.</p><p class="b">Things happening right now, out in the world and too faint to feel, are dropping the ink. Each note says what has just fallen.</p></div>
+  <div id="plate"><div class="t">æsthetoica</div><div class="n" id="no">Sheet No. —</div><div class="d" id="dt">—</div><div class="d">Lyme Regis</div><div class="d"><span id="bg">—</span></div></div></div></div>
+
+<div id="pam" role="dialog" aria-label="On the word æsthetoica">
+<a class="back" href="#">Back to the tray</a>
+<div class="leaf">
+ <div class="tp">
+  <div class="a">On the word</div>
+  <div class="w">æsthetoica</div>
+  <div class="s">with some account of the ledgers of Thomasin Gale, bookbinder, of Broad Street, Lyme Regis</div>
+  <div class="r"></div>
+  <div class="i">Printed for the tray, and sold nowhere</div>
+ </div>
+ <div class="prose">
+  <p class="first">Thomasin Gale bound books in Broad Street, Lyme Regis, from 1811 until her eyesight went. Like most binders she made her own marbled endpapers, and like most marblers on the coast she made her size from carrageen, the purple moss that washes up below Church Cliffs after a south-westerly.</p>
+  <p>In the winter of 1823 she noticed that her tray was not keeping still.</p>
+  <p>She had left a bath of size overnight with a few drops of colour on it, as she sometimes did to test a pigment. In the morning the colours had moved. Not spread, which is expected, but travelled, in curls and stripes, as if something had been drawing in the tray while the house slept. She skimmed it, laid fresh colour, and the same thing happened the next night, and the next.</p>
+  <p>Gale did what a bookbinder does. She took a print every morning and kept a ledger. Her entries are short and practical, and a few of them are given below.</p>
+  <p>She needed a word for the sheets and could not find one, so she made one. She knew enough Greek from her Bible-binding trade to know that <em>aisthētikos</em> means a thing that can be perceived. Her sheets were the opposite: things that passed through the room and could not be felt. She added an ending of her own and wrote it on the spine of the first ledger. Æsthetoica: <em>what is felt by the tray and by nobody else.</em></p>
+  <p>She kept the tray going until 1839. On Christmas night of that year the cliffs at Bindon, a few miles west, slid into the sea in one of the largest landslips in English history. Gale had moved the tray to her sister’s cottage on that stretch of coast for the holiday. The cottage went with the land. So did the tray.</p>
+  <p>The ledgers survived, eleven volumes and a little over five thousand sheets. People who have studied them since note two things. The ochre is heaviest in the years when the Sun is quietest. And the combing happens more than once.</p>
+  <p>The tray was never found. This is an attempt to keep the sheets going, numbered on from hers.</p>
+ </div>
+</div>
+<div class="leaf">
+ <div class="ledger">
+  <h3>From the first and fourth ledgers</h3>
+  <div class="ent"><span class="d">3 Dec 1823</span>Left a test bath. Colours moved in the night. Skimmed it.</div>
+  <div class="ent"><span class="d">4 Dec</span>The same. Took a print and kept it.</div>
+  <div class="ent"><span class="d">11 Jan 1824</span>Ochre fine, like rain through a roof.<i style="background:#c98a2c"></i></div>
+  <div class="ent"><span class="d">2 Feb</span>Green turning the whole tray, strong. Mr Hounsell says there were lights in the north.<i style="background:#3f7d73"></i></div>
+  <div class="ent"><span class="d">19 Mar</span>Blue in drops, unaccountable.<i style="background:#2b3f73"></i></div>
+  <div class="ent"><span class="d">13 Nov 1833</span>Red lines all night, very quick, too many to count.<i style="background:#a32a2f"></i></div>
+  <div class="ent"><span class="d">7 Mar 1836</span>Combed. No one here.</div>
+  <div class="ent"><span class="d">22 Dec 1839</span>Taking the tray to Susan’s for Christmas.</div>
+ </div>
+ <div class="fn">
+  <p>13 November 1833. That night the great Leonid meteor storm was seen across North America.</p>
+  <p>The entries are her own; the spelling has been modernised. The blots of colour are where the page touched the tray.</p>
+  <p><em>Thomasin Gale, her tray and her ledgers are a fiction. Carrageen marbling size, the cliffs below Church Cliffs and the Bindon landslip of Christmas 1839 are not.</em></p>
+  <p style="margin-top:14px"><span style="font-family:'IM Fell English SC',serif">Sources.</span> Magnetic field: Hartland Observatory, British Geological Survey, via INTERMAGNET. Cosmic rays: the Kiel neutron monitor, via the NMDB database (www.nmdb.eu), founded under the European Union’s FP7 programme. Meteors: the Global Meteor Network (CC BY 4.0). Gravitational waves: public alerts from LIGO, Virgo and KAGRA via GraceDB. Grid frequency: contains BSC information that is available from Elexon at no charge and which is licensed under the Elexon Public Data Licence. Edits: Wikimedia EventStreams. Lighthouse characters: Trinity House. This is a non-commercial project.</p>
+ </div>
+</div>
+</div>
+
+<div id="arch" role="dialog" aria-label="Sheets"><a class="close" href="#">Back to the tray</a>
+ <div class="in"><h2>Sheets</h2><div class="sub">Each day’s sheet is pulled at midnight. Numbered on from Thomasin Gale’s first, 3 December 1823.</div>
+ <div class="turn">Turn to any day: <input type="date" id="dayin" min="1823-12-03"> <a id="goday">Turn</a></div>
+ <div id="arch-list"></div>
+ <div class="foot">The handwritten line under each sheet is the keeper’s note for that day. Until the nightly ledger is running, the notes shown are specimens, written to the same pattern.</div></div></div>
+<i class="crop tl"></i><i class="crop tr"></i><i class="crop bl"></i><i class="crop br"></i>
+<div id="key"><div class="k k-ink">
+  <span><i style="background:#c98a2c;--r:10deg"></i><b>Ochre</b> cosmic-ray neutrons, Kiel monitor</span>
+  <span><i style="background:#3f7d73;--r:-20deg"></i><b>Verdigris</b> the current, Earth’s magnetic field at Hartland</span>
+  <span><i style="background:#2b3f73;--r:35deg"></i><b>Indigo</b> edits to obscure Wikipedia articles</span>
+  <span><i style="background:#a32a2f;--r:-5deg"></i><b>Carmine</b> meteors over the south-west</span>
+  <span><i style="background:#d6a531;--r:60deg"></i><b>Gold</b> Start Point, Portland Bill and Anvil Point lighthouses on the Dorset and Devon coast, in their real rhythms</span>
+  <span><b>The comb</b> a gravitational wave, raked through the whole tray</span>
+  <span><b>The rocking</b> the frequency of Great Britain’s National Grid</span>
+</div>
+<div class="k k-cloud">
+  <span><b>Long straight lines</b> cosmic-ray muons, at the rate the Kiel neutron monitor is counting</span>
+  <span><b>Curls</b> electrons, wound tighter as Earth’s magnetic field stirs at Hartland</span>
+  <span><b>Short thick stubs</b> edits to obscure Wikipedia articles</span>
+  <span><b>A bright trail shedding sparks</b> a meteor over the south-west</span>
+  <span><b>A ripple through the vapour</b> a gravitational wave</span>
+  <span><b>The lamp</b> flickers with the National Grid, and after dark Portland Bill’s four flashes come through</span>
+</div>
+<div class="k k-drum">
+  <span><b>The pens</b> magnetic force at Hartland, cosmic-ray neutrons at Kiel, the National Grid, meteors over the south-west, Wikipedia edits, gravitational waves</span>
+  <span><b>The ticks</b> one a minute along the edge of the drum</span>
+  <span><b>The window</b> brightens with Portland Bill’s beam after dark</span>
+</div>
+  <span class="where">The clock and the sky are Lyme Regis’s. The instruments are wherever they happen to be.</span>
+</div>
+<script>
+(()=>{
+'use strict';
+const TAU=Math.PI*2, MN=60e3, HR=3600e3, DY=86400e3, GWB=6*HR;
+const NM_START=Date.UTC(1951,0,1), HART_START=Date.UTC(1957,0,1), UKMON_START=Date.UTC(2012,0,1), GW_START=Date.UTC(2015,8,14,9,50);
+const CR_AVG=6380;
+
+/* ---------- deterministic randomness ---------- */
+function hash(a,b){let h=Math.imul(a|0,0x9E3779B1)^Math.imul((b|0)+0x632BE5AB,0x85EBCA77);h^=h>>>15;h=Math.imul(h,0x2C1B3C6D);h^=h>>>12;h=Math.imul(h,0x297A2D39);h^=h>>>15;return (h>>>0)/4294967296;}
+function mulberry(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function seed(a,b){return (hash(a,b)*4294967296)>>>0;}
+function vnoise(x,ch){const i=Math.floor(x),f=x-i,u=f*f*(3-2*f);return hash(i,ch)*(1-u)+hash(i+1,ch)*u;}
+function fbm(x,ch){return (vnoise(x,ch)*.5+vnoise(x*2.1,ch+11)*.3+vnoise(x*4.3,ch+23)*.2)*2-1;}
+function poisson(l,r){if(l<=0)return 0;const L=Math.exp(-l);let k=0,p=1;do{k++;p*=r();}while(p>L&&k<60);return k-1;}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const pick=(arr,r)=>arr[Math.floor(r*arr.length)%arr.length];
+
+/* ---------- simulated physics ---------- */
+function yearFrac(t){return 1970+t/(365.25*DY);}
+function dayOfYear(t){const y=new Date(t).getUTCFullYear();return (t-Date.UTC(y,0,1))/DY;}
+function stormsNear(t){const d=Math.floor(t/DY),out=[];for(let k=d-6;k<=d;k++){const r=mulberry(seed(k,77));if(r()<.07)out.push({onset:k*DY+r()*DY,s:.35+r()*.65});}return out;}
+function solarStorm(t){let g=0,f=0;for(const s of stormsNear(t)){const h=(t-s.onset)/HR;if(h<0)continue;g+=s.s*(1-Math.exp(-h/1.5))*Math.exp(-h/20);f+=s.s*(1-Math.exp(-h/1.2))*Math.exp(-h/45);}return {geo:g,forbush:f};}
+function neutron(t,st){const cyc=1+.09*Math.cos(TAU*(yearFrac(t)-2019.9)/11);const di=1+.003*Math.sin(TAU*(t%DY)/DY-1);const n=1+.006*fbm(t/HR/3,5)+.002*fbm(t/MN,6);return CR_AVG*cyc*di*n*(1-.075*Math.min(st.forbush,1.2));}
+function magH(t,st){const hod=((t%DY)+DY)%DY/DY;const sq=-22*Math.max(0,Math.sin(TAU*(hod-.25)))*(.6+.4*Math.cos(TAU*(dayOfYear(t)-172)/365));return sq+6*fbm(t/HR*1.5,9)+(2+30*st.geo)*fbm(t/MN/4,10)-180*st.geo;}
+function state(t){const st=solarStorm(t);const n=neutron(t,st);const h=magH(t,st);const h2=magH(t-10*MN,solarStorm(t-10*MN));const dhdt=h-h2;
+  const kp=clamp(Math.round(.6+st.geo*7.5+Math.abs(dhdt)/12),0,9);const I=Math.min(1,.12+st.geo*1.1+Math.abs(dhdt)/45+.035*kp);return {st,n,h,dhdt,kp,I};}
+
+const SHOWERS=[
+ {n:'Quadrantid',m:0,d:3,zhr:110,w:.45,v:41,rad:[.82,-.35],par:'asteroid 2003 EH1'},
+ {n:'Lyrid',m:3,d:22,zhr:18,w:1.2,v:49,rad:[.65,-.4],par:'Comet Thatcher'},
+ {n:'Eta Aquariid',m:4,d:6,zhr:50,w:2.5,v:66,rad:[.1,1.2],par:'Halley’s Comet'},
+ {n:'Perseid',m:7,d:12,zhr:100,w:2.2,v:59,rad:[.9,-.3],par:'Comet Swift–Tuttle'},
+ {n:'Draconid',m:9,d:8,zhr:10,w:.4,v:20,rad:[.5,-.6],par:'Comet Giacobini–Zinner'},
+ {n:'Orionid',m:9,d:21,zhr:20,w:2.5,v:66,rad:[.15,-.2],par:'Halley’s Comet'},
+ {n:'Leonid',m:10,d:17,zhr:15,w:1,v:71,rad:[.22,-.3],par:'Comet Tempel–Tuttle'},
+ {n:'Geminid',m:11,d:14,zhr:150,w:1.1,v:35,rad:[.4,-.35],par:'asteroid 3200 Phaethon'},
+ {n:'Ursid',m:11,d:22,zhr:10,w:.6,v:33,rad:[.7,-.5],par:'Comet Tuttle'}];
+function showerAct(s,t){const y=new Date(t).getUTCFullYear();let best=0;for(const yy of [y-1,y,y+1]){const dd=(t-Date.UTC(yy,s.m,s.d))/DY;const a=s.zhr*Math.exp(-(dd*dd)/(2*s.w*s.w));if(a>best)best=a;}return best;}
+function isDark(t){const half=6-2*Math.cos(TAU*(dayOfYear(t)-172)/365);let h=(((t%DY)+DY)%DY)/HR;let fm=(h>12?h-24:h)-.3;return Math.abs(fm)<half?1:0;}
+function clearSky(t){const night=Math.floor((t+12*HR)/DY);const base=hash(night,33);const c=base>.42?1:base/.42*.35;return clamp(c+.25*fbm(t/HR,40),0,1);}
+function meteorRate(t){if(!isDark(t))return {rate:0,dark:0,clr:1,active:[],spor:0};const hod=(((t%DY)+DY)%DY)/HR;const spor=7*(1+.7*Math.max(0,Math.cos(TAU*(hod-5)/24)));
+  let r=spor;const active=[];for(const s of SHOWERS){const a=showerAct(s,t)*.25;if(a>.25){r+=a;active.push({s,a});}}const clr=clearSky(t);return {rate:r*clr,dark:1,clr,active,spor};}
+const PLACES=['Lyme Bay','the Blackdown Hills','Exmoor','Dartmoor','Portland Bill','Cranborne Chase','the Somerset Levels','the Bristol Channel','Salisbury Plain','the Isle of Wight','the north Devon coast','the Quantocks'];
+function meteorsInMinute(m){const t0=m*MN;if(t0<UKMON_START)return [];const R=meteorRate(t0);if(!R.rate)return [];const r=mulberry(seed(m,501));const n=Math.min(8,poisson(R.rate/60,r));const out=[];
+  const tot=R.spor+R.active.reduce((a,b)=>a+b.a,0);
+  for(let i=0;i<n;i++){let x=r()*tot,sh=null;x-=R.spor;if(x>0){for(const a of R.active){x-=a.a;if(x<=0){sh=a.s;break;}}if(!sh&&R.active.length)sh=R.active[R.active.length-1].s;}
+    const v=sh?sh.v+(r()-.5)*3:12+r()*58;const mag=-3+r()*6.5;const h1=80+v*.55+r()*8;
+    out.push({t:t0+r()*MN,sh,v,mag,h1,h2:h1-(10+r()*25),place:pick(PLACES,r()),cams:2+Math.floor(r()*5),dur:.25+(1-v/75)*.7,sx:.06+r()*.88,sy:.08+r()*.5,ang:r(),lenK:.6+r()*.8});}
+  return out;}
+function gwInBlock(k){const t0=k*GWB;if(t0<GW_START)return null;const r=mulberry(seed(k,909));if(r()>.085)return null;
+  const t=t0+r()*GWB;const q=r();let type,typeName,m1,m2,dist;
+  if(q<.86){type='BBH';typeName='Binary black hole';m1=10+r()*50;m2=5+r()*(m1-5);dist=300+r()*4700;}
+  else if(q<.94){type='NSBH';typeName='Neutron star–black hole';m1=5+r()*15;m2=1.2+r()*.8;dist=150+r()*850;}
+  else {type='BNS';typeName='Binary neutron star';m1=1.2+r()*.9;m2=1.1+r()*(m1-1.1);dist=40+r()*260;}
+  const d=new Date(t);const nm='S'+String(d.getUTCFullYear()).slice(2)+String(d.getUTCMonth()+1).padStart(2,'0')+String(d.getUTCDate()).padStart(2,'0')+String.fromCharCode(97+Math.floor(r()*26))+String.fromCharCode(97+Math.floor(r()*26));
+  return {t,type,typeName,m1,m2,dist,name:nm,x:.18+r()*.64,y:.15+r()*.5};}
+function gridHz(t){return 50+.075*fbm(t/(3*MN),71)+.03*fbm(t/15e3,72);}
+function lastGW(t){const k0=Math.floor(t/GWB);for(let k=k0;k>k0-240;k--){const e=gwInBlock(k);if(e&&e.t<=t)return e;}return null;}
+
+const WK_SIM=["Death's-head hawkmoth",'Glow-worm','Mary Anning','Ammonite','Blue Lias','Golden Cap','Charmouth','Dunwich','Doggerland','Tardigrade','Lichen',"Will-o'-the-wisp",'Adder stone','Witch bottle','Bog body','Barn owl','Diaphone','Fog signal','Numbers station','Shipping Forecast','Orrery','Cabinet of curiosities','Sea glass','Driftwood','Holloway (road)','Dew pond','Corpse road','Cup and ring mark','Chesil Beach','Portland Bill Lighthouse','Ichthyosaur','European eel'];
+/* =====================================================================
+   THE TRAY
+   A day's sheet is a deterministic function of that day's events:
+   real ones from data/days/YYYY-MM-DD.json when present, otherwise a
+   simulation. The sheet begins at midnight (London) and is "pulled"
+   at the next midnight.
+   ===================================================================== */
+const PARAMS=new URLSearchParams(location.search);
+const RENDER=PARAMS.get('render');               // YYYY-MM-DD: nightly print mode
+const STEPS_PER_DAY=3600;                         // fluid steps in a full day's sheet
+const FIRST_SHEET=Date.UTC(1823,11,3);
+const londonDate=t=>new Date(t).toLocaleDateString('en-CA',{timeZone:'Europe/London'});         // YYYY-MM-DD
+function midnightLondon(dateStr){const [y,m,d]=dateStr.split('-').map(Number);let t=Date.UTC(y,m-1,d);const off=new Date(t).toLocaleString('en-GB',{timeZone:'Europe/London',hour:'2-digit',hour12:false});return t-((+off%24)*HR);}
+const sheetNo=dateStr=>{const [y,m,d]=dateStr.split('-').map(Number);return Math.floor((Date.UTC(y,m-1,d)-FIRST_SHEET)/DY)+1;};
+const fmtDate=dateStr=>{const [y,m,d]=dateStr.split('-').map(Number);return new Date(Date.UTC(y,m-1,d,12)).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});};
+
+/* ---------------- event feed ---------------- */
+const LIGHTS=[{n:'Start Point',x:.08},{n:'Portland Bill',x:.78},{n:'Anvil Point',x:.93}];
+const Feed={day:null,date:null,
+  base:RENDER?'data/':((document.querySelector('meta[name=data-base]')||{}).content||'data/'),liveWiki:false,
+  async load(dateStr,keep){let d=null;try{const r=await fetch(this.base+'days/'+dateStr+'.json',{cache:'no-store'});if(r.ok)d=await r.json();}catch(_){}if(!keep||d){this.date=dateStr;this.day=d;}return this.day;},
+  series(name,t){const s=this.day&&this.day[name];if(!s||!s.length)return null;if(t<=s[0][0])return s[0][1];for(let i=1;i<s.length;i++)if(s[i][0]>=t){const a=s[i-1],b=s[i];return a[1]+(b[1]-a[1])*(t-a[0])/((b[0]-a[0])||1);}return s[s.length-1][1];},
+  I(t){const k=this.series('kp',t);if(k!=null)return clamp(.12+k*.1,0,1);return state(t).I;},
+  cf(t){const n=this.series('neutron',t);const base=this.day&&this.day.neutron_mean||CR_AVG;const v=n!=null?n/base:state(t).n/CR_AVG;return clamp(1+(v-1)*5,.3,2);},
+  hz(t){const f=this.series('hz',t);return f!=null?f:gridHz(t);},
+  real(kind){return !!(this.day&&Array.isArray(this.day[kind]));},
+  events(t0,t1){const out=[];if(t1<=t0)return out;
+    for(let m=Math.floor(t0/MN);m<=Math.floor((t1-1)/MN);m++){const r=mulberry(seed(m,4242));const tm=m*MN;
+      const inW=t=>t>=t0&&t<t1;
+      // cosmic rays: ochre speckle, rate follows the neutron monitor
+      const ncr=poisson(6.5*this.cf(tm),r);for(let i=0;i<ncr;i++){const t=tm+r()*MN;if(inW(t))out.push({t,type:'cr',x:r(),y:r(),s:r()});}
+      // the magnetic field: currents, more and stronger when unsettled
+      const I=this.I(tm);if(r()<(6+22*I)/60){const t=tm+r()*MN;if(inW(t))out.push({t,type:'cur',x:.15+r()*.7,y:.15+r()*.7,a:r()*TAU,s:I});}
+      // lighthouses drip gold at the shore, at night
+      if(!isDark(tm)){}else if(m%10===0){for(let i=0;i<3;i++){const t=tm+i*7000;if(inW(t))out.push({t,type:'lh',i});}}
+      // simulated feeds (replaced by real ones when the day file has them)
+      if(!this.real('wiki')&&r()<.2){const t=tm+r()*MN;if(inW(t))out.push({t,type:'wk',x:.12+r()*.76,y:.18+r()*.68,title:WK_SIM[Math.floor(r()*WK_SIM.length)],bytes:Math.round((r()<.7?1:-1)*(2+r()*r()*400))});}
+      if(!this.real('meteors'))for(const e of meteorsInMinute(m))if(inW(e.t))out.push({t:e.t,type:'me',a:hash(e.t|0,3)*TAU,b:clamp((3.5-e.mag)/6,.2,1),name:e.sh?e.sh.n:'Sporadic'});
+      if(!this.real('gw')){const e=gwInBlock(Math.floor(tm/GWB));if(e&&e.t>=tm&&e.t<tm+MN&&inW(e.t))out.push({t:e.t,type:'gw',a:hash(e.t|0,5)*TAU,name:e.name});}}
+    if(this.day){
+      for(const w of this.day.wiki||[])if(w.t>=t0&&w.t<t1)out.push({t:w.t,type:'wk',x:.12+hash(w.t|0,7)*.76,y:.18+hash(w.t|0,8)*.68,title:w.title,bytes:w.bytes||0});
+      for(const e of this.day.meteors||[])if(e.t>=t0&&e.t<t1)out.push({t:e.t,type:'me',a:hash(e.t|0,3)*TAU,b:clamp((3.5-(e.mag??1))/6,.2,1),name:e.shower||'Sporadic'});
+      for(const e of this.day.gw||[])if(e.t>=t0&&e.t<t1)out.push({t:e.t,type:'gw',a:hash(e.t|0,5)*TAU,name:e.id});}
+    return out.sort((a,b)=>a.t-b.t);},
+  summary(dateStr){// event counts for a day (used for the archive and ledger fallback)
+    const t0=midnightLondon(dateStr),c={cr:0,cur:0,wk:0,me:0,gw:0,lh:0,I:0,cf:0,dawn:0};const evs=this.events(t0,t0+DY);
+    for(const e of evs){if(e.type==='me'&&!(e.b>.92&&hash(e.t|0,41)<.3))continue;c[e.type]++;if(e.type==='me'){const h=new Date(e.t).getUTCHours();if(h>=2&&h<7)c.dawn++;}}
+    for(let h=0;h<24;h+=3){c.I+=this.I(t0+h*HR)/8;c.cf+=this.cf(t0+h*HR)/8;}return c;}};
+
+/* a ledger line in Thomasin's manner, for days the nightly job hasn't written yet */
+function specimenLedger(c){const p=[];
+  if(c.me>14)p.push('Red lines all night, too many to count.');else if(c.me>8)p.push(c.dawn>c.me/2?'Red lines, mostly before dawn.':'Red lines, a fair few.');else if(c.me>0)p.push('Red lines, '+(['once','twice','three times','four times','five times','six times','seven times','eight times'][c.me-1])+'.');else p.push('No red.');
+  p.push(c.I>.45?'Green turning the whole tray, strong.':c.I>.25?'Green turning the tray.':'Green slow.');
+  p.push(c.cf>1.06?'Ochre heavy.':c.cf<.94?'Ochre thin.':'Ochre fine.');
+  if(c.gw)p.push('Combed. No one here.');
+  return p.join(' ');}
+
+/* ---------------- the fluid ---------------- */
+const Tray=(()=>{
+let combs=[];let cv,gl,P={},vel,dye,div,curlT,pres,simW=0,simH=0,dyeW=0,dyeH=0,ok=true,ov,octx,labels=[],strokes=[],wmPlain=false,SW=1,SH=1,RX=0,RY=0,wm=null,wmx=null,wmK=-1,tilt={x:0,y:0};
+const VS=`#version 300 es
+in vec2 aPos;out vec2 vUv,vL,vR,vT,vB;uniform vec2 texel;void main(){vUv=aPos*.5+.5;vL=vUv-vec2(texel.x,0.);vR=vUv+vec2(texel.x,0.);vT=vUv+vec2(0.,texel.y);vB=vUv-vec2(0.,texel.y);gl_Position=vec4(aPos,0.,1.);}`;
+const H=`#version 300 es
+precision highp float;precision highp sampler2D;in vec2 vUv,vL,vR,vT,vB;out vec4 o;`;
+const FS={
+ splat:H+`uniform sampler2D uT;uniform float aspect,radius;uniform vec3 color;uniform vec2 point;void main(){vec2 p=vUv-point;p.x*=aspect;vec3 s=exp(-dot(p,p)/radius)*color;o=vec4(texture(uT,vUv).xyz+s,1.);}`,
+ force:H+`uniform sampler2D uT;uniform vec2 f;void main(){o=vec4(texture(uT,vUv).xy+f,0.,1.);}`,
+ advect:H+`uniform sampler2D uV,uS;uniform vec2 texel;uniform float dt,diss;void main(){vec2 c=vUv-dt*texture(uV,vUv).xy*texel;o=texture(uS,c)*diss;o.a=1.;}`,
+ div:H+`uniform sampler2D uV;void main(){float L=texture(uV,vL).x,R=texture(uV,vR).x,T=texture(uV,vT).y,B=texture(uV,vB).y;o=vec4(.5*(R-L+T-B),0.,0.,1.);}`,
+ curl:H+`uniform sampler2D uV;void main(){float L=texture(uV,vL).y,R=texture(uV,vR).y,T=texture(uV,vT).x,B=texture(uV,vB).x;o=vec4(.5*(R-L-T+B),0.,0.,1.);}`,
+ vort:H+`uniform sampler2D uV,uC;uniform float curl,dt;void main(){float L=texture(uC,vL).x,R=texture(uC,vR).x,T=texture(uC,vT).x,B=texture(uC,vB).x,C=texture(uC,vUv).x;
+   vec2 f=.5*vec2(abs(T)-abs(B),abs(R)-abs(L));f/=length(f)+1e-4;f*=curl*C;f.y*=-1.;vec2 v=texture(uV,vUv).xy+f*dt;o=vec4(clamp(v,-1000.,1000.),0.,1.);}`,
+ pres:H+`uniform sampler2D uP,uD;void main(){float L=texture(uP,vL).x,R=texture(uP,vR).x,T=texture(uP,vT).x,B=texture(uP,vB).x,d=texture(uD,vUv).x;o=vec4((L+R+B+T-d)*.25,0.,0.,1.);}`,
+ grad:H+`uniform sampler2D uP,uV;void main(){float L=texture(uP,vL).x,R=texture(uP,vR).x,T=texture(uP,vT).x,B=texture(uP,vB).x;vec2 v=texture(uV,vUv).xy-vec2(R-L,T-B);o=vec4(v,0.,1.);}`,
+ scale:H+`uniform sampler2D uT;uniform float k;void main(){o=vec4(texture(uT,vUv).xyz*k,1.);}`,
+ wall:H+`uniform sampler2D uV;uniform vec2 texel;void main(){vec2 v=texture(uV,vUv).xy;vec2 e=texel*2.;if(vUv.x<e.x||vUv.x>1.-e.x)v.x=0.;if(vUv.y<e.y||vUv.y>1.-e.y)v.y=0.;o=vec4(v,0.,1.);}`,
+ show:H+`uniform sampler2D uD;uniform vec2 res;float h(vec2 p){p=fract(p*vec2(123.34,456.21));p+=dot(p,p+45.32);return fract(p.x*p.y);}
+   void main(){vec3 d=max(texture(uD,vUv).rgb,0.);vec3 paper=vec3(.955,.925,.86);paper-=h(floor(vUv*res*.5))*.025+h(floor(vUv*res*vec2(.05,1.)))*.02;
+     vec3 c=paper*exp(-d*2.4);float L=length(d);c+=vec3(.06,.05,.03)*smoothstep(0.,.6,L)*(1.-smoothstep(.6,2.,L));o=vec4(c,1.);}`};
+function sh(t,src){const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;}
+function prog(fs){const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,VS));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));gl.bindAttribLocation(p,0,'aPos');gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));
+  const u={};const n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);for(let i=0;i<n;i++){const nm=gl.getActiveUniform(p,i).name;u[nm]=gl.getUniformLocation(p,nm);}return {p,u};}
+function fbo(w,h){const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA16F,w,h,0,gl.RGBA,gl.HALF_FLOAT,null);
+  const f=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,f);gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,t,0);gl.viewport(0,0,w,h);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);return {t,f,w,h};}
+function dbl(w,h){let a=fbo(w,h),b=fbo(w,h);return {w,h,get r(){return a;},get w2(){return b;},swap(){const t=a;a=b;b=t;},clear(){for(const x of [a,b]){gl.bindFramebuffer(gl.FRAMEBUFFER,x.f);gl.viewport(0,0,w,h);gl.clearColor(0,0,0,1);gl.clear(gl.COLOR_BUFFER_BIT);}}};}
+function blit(target){if(target){gl.bindFramebuffer(gl.FRAMEBUFFER,target.f);gl.viewport(0,0,target.w,target.h);}else{gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,gl.drawingBufferWidth,gl.drawingBufferHeight);}gl.drawArrays(gl.TRIANGLES,0,3);}
+function use(p,texel){gl.useProgram(p.p);if(p.u.texel)gl.uniform2f(p.u.texel,texel[0],texel[1]);}
+function tex(p,name,unit,t){gl.activeTexture(gl.TEXTURE0+unit);gl.bindTexture(gl.TEXTURE_2D,t);gl.uniform1i(p.u[name],unit);}
+function init(canvas,overlay){cv=canvas;ov=overlay;octx=ov.getContext('2d');gl=cv.getContext('webgl2',{alpha:false,antialias:false,preserveDrawingBuffer:!!RENDER});
+  if(!gl||!gl.getExtension('EXT_color_buffer_float')){ok=false;return;}gl.getExtension('OES_texture_float_linear');
+  try{for(const k in FS)P[k]=prog(FS[k]);}catch(e){console.warn(e);ok=false;return;}
+  const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,2,gl.FLOAT,false,0,0);}
+let pendingReset=null,activeUntil=0;
+/* every drop remembers what made it; the marks drift with the water so you can ask the sheet later */
+let marks=[],dust=[],vbuf=null,trackN=0,trackDt=0,lastCap={};
+const PIG={cr:'#c9962e',cur:'#3f8f7f',wk:'#34508f',me:'#b8323f',lh:'#d8a62a',gw:'#5a4a3a',ground:'#8a7a66'};
+const hhmm=t=>new Date(t).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'});
+function describe(m){switch(m.type){
+  case 'cr':return 'a cosmic-ray neutron, counted at Kiel';
+  case 'cur':return 'a shiver in Earth’s magnetic field, at Hartland';
+  case 'wk':return 'someone edited “'+m.title+'” on Wikipedia';
+  case 'me':return (m.name&&m.name!=='Sporadic'?'a meteor of the '+m.name:'a meteor')+' over the south-west';
+  case 'lh':return LIGHTS[m.i].n+' lighthouse, flashing';
+  case 'ground':return 'the first drops, laid down at midnight';}
+  return '';}
+function mark(type,x,y,e){const m={type,x,y,t:e&&e.t||(typeof App!=='undefined'?App.simT:Date.now())||Date.now(),title:e&&e.title,name:e&&e.name,i:e&&e.i};
+  if(type==='cr'||type==='lh'||type==='ground'){dust.push(m);if(dust.length>2600)dust.splice(0,dust.length-2200);}else{marks.push(m);if(marks.length>3200)marks.splice(0,marks.length-2800);}return m;}
+function caption(m,life,pinned){if(!m)return;if(!pinned){const gap={cr:9000,cur:10000,lh:24000,wk:3000,me:0}[m.type]||0;const now=performance.now();if(now-(lastCap[m.type]||0)<gap)return;lastCap[m.type]=now;
+    if(labels.filter(l=>!l.pin).length>=4)return;}
+  else labels=labels.filter(l=>!l.pin);
+  labels.push({mk:m,col:PIG[m.type],a:describe(m),b:hhmm(m.t),age:0,life:life||7,pin:!!pinned});if(!pinned&&typeof App!=='undefined')App.captions=(App.captions||0)+1;}
+function track(dt){trackDt+=dt;if(++trackN%6)return;const d=trackDt;trackDt=0;if(!marks.length&&!dust.length)return;
+  try{const n=simW*simH*4;if(!vbuf||vbuf.length!==n)vbuf=new Float32Array(n);gl.bindFramebuffer(gl.FRAMEBUFFER,vel.r.f);gl.readPixels(0,0,simW,simH,gl.RGBA,gl.FLOAT,vbuf);}catch(_){return;}
+  const mv=m=>{const i=Math.min(simW-1,Math.max(0,m.x*simW|0)),j=Math.min(simH-1,Math.max(0,m.y*simH|0)),k=(j*simW+i)*4;m.x=clamp(m.x+d*vbuf[k]/simW,.002,.998);m.y=clamp(m.y+d*vbuf[k+1]/simH,.002,.998);};
+  for(const m of marks)if(!m.fly)mv(m);for(const m of dust)mv(m);}
+/* asking the sheet: read the ink under the pointer, decide which pigment it mostly is, then find the drop of that pigment nearest to here */
+const GROUPS={ochre:['cr','lh'],verdigris:['cur'],indigo:['wk'],carmine:['me'],sepia:[]};
+function GROUP(c){return c===OCHRE||c===GOLD?'ochre':c===VERDIGRIS?'verdigris':c===INDIGO?'indigo':c===CARMINE?'carmine':'sepia';}
+const px4=new Float32Array(4);
+function inkAt(x,y){try{gl.bindFramebuffer(gl.FRAMEBUFFER,dye.r.f);gl.readPixels(clamp(x*dyeW|0,0,dyeW-1),clamp(y*dyeH|0,0,dyeH-1),1,1,gl.RGBA,gl.FLOAT,px4);}catch(_){return null;}
+  const v=[px4[0],px4[1],px4[2]],mag=Math.hypot(...v);if(mag<.06)return null;let best='sepia',bc=-1;
+  for(const [g,c] of [['ochre',OCHRE],['verdigris',VERDIGRIS],['indigo',INDIGO],['carmine',CARMINE],['sepia',SEPIA]]){const cs=(v[0]*c[0]+v[1]*c[1]+v[2]*c[2])/(mag*Math.hypot(...c));if(cs>bc){bc=cs;best=g;}}return best;}
+function nearest(x,y){const asp=SW/SH,g=inkAt(x,y);if(!g)return null;const types=GROUPS[g];let best=null,bd=1e9;
+  for(const arr of [marks,dust])for(const m of arr){if(!(types.includes(m.type)||(m.type==='ground'&&m.g===g)))continue;const dx=(m.x-x)*asp,dy=m.y-y;const dd=Math.hypot(dx,dy)*(m.type==='ground'?1.6:m.type==='cr'?1.3:1);if(dd<bd){bd=dd;best=m;}}
+  return best||{type:'ground',x,y,t:App.t0,g};}const wake=(ms)=>{activeUntil=Math.max(activeUntil,performance.now()+(ms||3500));};
+function resize(){if(!ok)return;const r=cv.getBoundingClientRect();if(r.width<2||r.height<2)return;SW=r.width;SH=r.height;RX=r.left;RY=r.top;const pr=RENDER?1:Math.min(devicePixelRatio||1,1.5);cv.width=SW*pr;cv.height=SH*pr;ov.width=SW*pr;ov.height=SH*pr;octx.setTransform(pr,0,0,pr,0,0);
+  if(!vel){const asp=SW/SH;simH=160;simW=Math.round(simH*asp);dyeH=RENDER?1100:720;dyeW=Math.round(dyeH*asp);vel=dbl(simW,simH);dye=dbl(dyeW,dyeH);pres=dbl(simW,simH);div=fbo(simW,simH);curlT=fbo(simW,simH);if(pendingReset){const d=pendingReset;pendingReset=null;reset(d);}}}
+function splat(target,x,y,color,radius){const p=P.splat;use(p,[1/target.w,1/target.h]);tex(p,'uT',0,target.r.t);gl.uniform1f(p.u.aspect,SW/SH);gl.uniform2f(p.u.point,x,y);gl.uniform3f(p.u.color,color[0],color[1],color[2]);gl.uniform1f(p.u.radius,radius);blit(target.w2);target.swap();}
+const OCHRE=[.1,.6,1.9],CARMINE=[.3,2.2,1.5],INDIGO=[2.2,1.5,.35],GOLD=[.05,.5,1.8],SEPIA=[.6,.9,1.2],VERDIGRIS=[1.6,.35,.75];
+const mul=(c,k)=>[c[0]*k,c[1]*k,c[2]*k];
+// the ground: each day begins with its own drops, seeded by the date
+function reset(dateStr){if(!ok)return;if(!vel){pendingReset=dateStr;return;}vel.clear();dye.clear();pres.clear();labels=[];strokes=[];combs=[];marks=[];dust=[];const r=mulberry(seed(sheetNo(dateStr),99));const pal=[INDIGO,CARMINE,OCHRE,VERDIGRIS,GOLD,SEPIA];
+  for(let i=0;i<36;i++){const x=r(),y=r();splat(dye,x,y,mul(pal[i%pal.length],.2+r()*.25),.001+r()*.0035);const gm=mark('ground',x,y,{t:midnightLondon(dateStr)});gm.g=GROUP(pal[i%pal.length]);}
+  for(let i=0;i<10;i++){const a=r()*TAU;splat(vel,r(),r(),[Math.cos(a)*700,Math.sin(a)*700,0],.006);}}
+const KREP={cr:.3,cur:.3,wk:.14,me:.25,gw:1,lh:.35};
+function apply(e,showLabels){if(!vel)return;if(e.type!=='cr'&&e.type!=='lh')wake(e.type==='gw'?6000:3500);const k=showLabels?1:(KREP[e.type]||1);switch(e.type){
+  case 'cr':splat(dye,e.x,e.y,mul(OCHRE,(e.puff?.35:.55)*k),.00004+e.s*.00008);{const m=mark('cr',e.x,e.y,e);if(showLabels)caption(m);}if(e.puff){const a=Math.random()*TAU;splat(vel,e.x,e.y,[Math.cos(a)*90,Math.sin(a)*90,0],.0006);}break;
+  case 'cur':{const s=300+900*e.s;splat(vel,e.x,e.y,[Math.cos(e.a)*s,Math.sin(e.a)*s,0],.01);splat(dye,e.x,e.y,mul(VERDIGRIS,.12*k),.0025);{const m=mark('cur',e.x,e.y,e);if(showLabels)caption(m);}break;}
+  case 'wk':splat(dye,e.x,e.y,mul(INDIGO,showLabels?.55:k),.0025+Math.abs(e.bytes%7)*.0004);splat(vel,e.x,e.y,[(e.x-.5)*60,(e.y-.5)*60,0],.005);{const m=mark('wk',e.x,e.y,e);if(showLabels){caption(m);Sound.drip();}}break;
+  case 'me':if(e.b>.92&&hash(e.t|0,41)<.3){const x=.5-Math.cos(e.a)*.42,y=.5-Math.sin(e.a)*.36,m=mark('me',x,y,e);m.fly=true;strokes.push({x,y,a:e.a,k:0,b:e.b*k,mk:m});if(showLabels){caption(m);Sound.whoosh();}}else{const x=.5-Math.cos(e.a)*.3*e.b,y=.5-Math.sin(e.a)*.3;splat(dye,x,y,mul(CARMINE,.18*k),.00008);const m=mark('me',x,y,e);if(showLabels)caption(m);}break;
+  case 'gw':{const a=e.a!=null?e.a:hash(e.t|0,9)*TAU;combs.push({a,p:-.05,n:22});if(showLabels){labels.push({x:.5,y:.5,col:PIG.gw,a:'a gravitational wave'+(e.name?', '+e.name+',':'')+' passed through, combing the whole tray',b:hhmm(e.t||Date.now()),age:-.5,life:9});App.captions=(App.captions||0)+1;Sound.comb();}break;}
+  case 'lh':splat(dye,LIGHTS[e.i].x,.035,mul(GOLD,.7*k),.0006);{const m=mark('lh',LIGHTS[e.i].x,.035,e);if(showLabels)caption(m);}break;}}
+let probe=null;
+function user(kind,x,y,dx,dy){if(!vel)return;if(kind==='stir'){wake(2500);splat(vel,x,y,[dx*6000,dy*6000,0],.0009);probe=null;return;}
+  if(kind==='leave'){probe=null;return;}
+  const m=nearest(x,y),col=m&&(m.type==='ground'?{ochre:PIG.cr,verdigris:PIG.cur,indigo:PIG.wk,carmine:PIG.me,sepia:PIG.ground}[m.g]:PIG[m.type]);
+  if(kind==='hover'){probe=m?{x,y,col,a:describe(m),b:hhmm(m.t)}:null;return;}
+  if(m){labels=labels.filter(l=>!l.pin);labels.push({x,y,col,a:describe(m),b:hhmm(m.t),age:.5,life:6,pin:true});probe=null;Sound.drip();}else{labels=labels.filter(l=>!l.pin);labels.push({x,y,col:'#e8dfcb',a:'clean paper; nothing has reached here yet',b:'',age:0,life:3,pin:true});}}
+function step(dt,simT,dayK,rockK){if(!vel)return;if(dayK==null)dayK=1;if(rockK==null)rockK=1;const sv=[1/simW,1/simH];
+  // the National Grid rocks the tray; strokes (meteors) are dragged across
+  if(rockK>0){const hz=Feed.hz(simT);const k=Math.sin(simT/1000*.05*(1.2+(hz-50)*40))*(22+Math.abs(hz-50)*120)*rockK;splat(vel,.5,.5+.32*Math.sin(simT/3.6e6),[k,0,0],.05);}
+  for(let i=strokes.length-1;i>=0;i--){const m=strokes[i];m.x+=Math.cos(m.a)*.012;m.y+=Math.sin(m.a)*.012;m.k++;splat(dye,m.x,m.y,mul(CARMINE,.22*m.b+.06),.00035);splat(vel,m.x,m.y,[Math.cos(m.a)*900,Math.sin(m.a)*900,0],.0008);if(m.mk){m.mk.x=clamp(m.x,.01,.99);m.mk.y=clamp(m.y,.01,.99);}if(m.k>60){if(m.mk)m.mk.fly=false;strokes.splice(i,1);}}
+  for(let i=combs.length-1;i>=0;i--){const c=combs[i];const ca=Math.cos(c.a),sa=Math.sin(c.a),asp=SW/SH;c.p+=.009;
+    const L=Math.hypot(asp,1)*1.05;for(let k=0;k<c.n;k++){const off=(k/(c.n-1)-.5)*L;const X=asp/2+ca*(c.p-.5)*L-sa*off,Y=.5+sa*(c.p-.5)*L+ca*off;const x=X/asp,y=Y;
+      if(x<-.03||x>1.03||y<-.03||y>1.03)continue;splat(vel,x,y,[ca*480,sa*480,0],.00022);}
+    if(c.p>1.05)combs.splice(i,1);}
+  if(tilt.x||tilt.y){use(P.force,sv);tex(P.force,'uT',0,vel.r.t);gl.uniform2f(P.force.u.f,tilt.x*dt*60,tilt.y*dt*60);blit(vel.w2);vel.swap();}
+  use(P.curl,sv);tex(P.curl,'uV',0,vel.r.t);blit(curlT);
+  use(P.vort,sv);tex(P.vort,'uV',0,vel.r.t);tex(P.vort,'uC',1,curlT.t);gl.uniform1f(P.vort.u.curl,(8+30*Feed.I(simT))*(rockK<1?.12:1));gl.uniform1f(P.vort.u.dt,dt);blit(vel.w2);vel.swap();
+  use(P.div,sv);tex(P.div,'uV',0,vel.r.t);blit(div);
+  use(P.scale,sv);tex(P.scale,'uT',0,pres.r.t);gl.uniform1f(P.scale.u.k,.8);blit(pres.w2);pres.swap();
+  use(P.pres,sv);tex(P.pres,'uD',1,div.t);for(let i=0;i<22;i++){tex(P.pres,'uP',0,pres.r.t);blit(pres.w2);pres.swap();}
+  use(P.grad,sv);tex(P.grad,'uP',0,pres.r.t);tex(P.grad,'uV',1,vel.r.t);blit(vel.w2);vel.swap();
+  use(P.wall,sv);tex(P.wall,'uV',0,vel.r.t);blit(vel.w2);vel.swap();
+  use(P.advect,sv);tex(P.advect,'uV',0,vel.r.t);tex(P.advect,'uS',1,vel.r.t);gl.uniform1f(P.advect.u.dt,dt);gl.uniform1f(P.advect.u.diss,rockK<1?Math.pow(.45,dt):.992);blit(vel.w2);vel.swap();
+  tex(P.advect,'uV',0,vel.r.t);tex(P.advect,'uS',1,dye.r.t);gl.uniform1f(P.advect.u.diss,Math.pow(.9993,dayK));blit(dye.w2);dye.swap();if(!RENDER)track(dt);}
+function draw(dt){if(!vel)return;use(P.show,[1/dyeW,1/dyeH]);tex(P.show,'uD',0,dye.r.t);gl.uniform2f(P.show.u.res,cv.width,cv.height);blit(null);
+  if(wmx&&!wmPlain){const k=performance.now()/250|0;if(k!==wmK){wmK=k;const w=wm.width,h=wm.height;wmx.globalCompositeOperation='source-over';wmx.clearRect(0,0,w,h);wmx.fillStyle='#000';wmx.font=`${h*.78}px "IM Fell Double Pica",serif`;wmx.fillText('æsthetoica',2,h*.74);
+    wmx.globalCompositeOperation='source-in';wmx.drawImage(cv,0,0,cv.width,cv.height,0,0,w,h);wmx.globalCompositeOperation='multiply';wmx.drawImage(cv,0,0,cv.width,cv.height,0,0,w,h);wmx.drawImage(cv,0,0,cv.width,cv.height,0,0,w,h);wmx.globalCompositeOperation='destination-in';wmx.fillText('æsthetoica',2,h*.74);}}
+  octx.clearRect(0,0,SW,SH);octx.font='italic 15px "IM Fell English",serif';
+  const note=(l,al)=>{const x=(l.mk?l.mk.x:l.x)*SW,y=(1-(l.mk?l.mk.y:l.y))*SH;octx.globalAlpha=al;
+    octx.fillStyle=l.col;octx.beginPath();octx.arc(x,y,3.2,0,TAU);octx.fill();octx.strokeStyle='rgba(52,38,28,.5)';octx.lineWidth=1;octx.beginPath();octx.arc(x,y,7,0,TAU);octx.stroke();
+    const fs=SW<520?13.5:16;octx.font=`italic ${fs}px "IM Fell English",serif`;const w=Math.max(octx.measureText(l.a).width,60);const left=x+w+28>SW;const tx=clamp(left?x-14-w:x+14,6,Math.max(6,SW-w-6)),ty=y<40?y+22:y-8;
+    octx.textAlign='left';octx.lineJoin='round';octx.lineWidth=5;octx.strokeStyle='rgba(243,236,220,.92)';octx.strokeText(l.a,tx,ty);octx.fillStyle='rgba(44,32,24,.95)';octx.fillText(l.a,tx,ty);
+    if(l.b){octx.font='13px "IM Fell English",serif';octx.strokeText(l.b,tx,ty+16);octx.fillStyle='rgba(90,70,52,.95)';octx.fillText(l.b,tx,ty+16);}octx.globalAlpha=1;};
+  for(const l of labels){l.age+=dt;const L=l.life||7;note(l,Math.max(0,Math.min(1,l.age*2))*Math.max(0,Math.min(1,(L-l.age)/1.2)));}labels=labels.filter(l=>l.age<(l.life||7));
+  if(probe&&!labels.some(l=>l.pin))note(probe,.95);}
+let driftT=0;function drift(dt,simT){if(!vel)return;driftT+=dt;const I=Feed.I(simT);
+  // a few slow eddies wander around the tray, stronger when the field is unsettled
+  for(let i=0;i<3;i++){const ph=driftT*.05+i*2.1;const x=.5+.36*Math.sin(ph*1.3+i),y=.5+.34*Math.cos(ph*.9+i*1.7);const a=ph*2.2+i;const sp=(5+22*I)*dt*6;splat(vel,x,y,[Math.cos(a)*sp,Math.sin(a)*sp,0],.012);}}
+return {init,resize,reset,apply,user,step,draw,drift,ok:()=>ok,ready:()=>!!vel,busy:()=>performance.now()<activeUntil||strokes.length>0||combs.length>0,caption,wordmark(c){wm=c;wmx=c.getContext('2d');},plainMark(on){wmPlain=on;wmK=-1;if(on&&wmx){const w=wm.width,h=wm.height;wmx.globalCompositeOperation='source-over';wmx.clearRect(0,0,w,h);wmx.font=`${h*.78}px "IM Fell Double Pica",serif`;const g=wmx.createLinearGradient(0,0,w*.6,h);g.addColorStop(0,'#e2c58a');g.addColorStop(.5,'#b08a4a');g.addColorStop(1,'#d9b57a');wmx.fillStyle=g;wmx.fillText('æsthetoica',2,h*.74);}},setTilt(x,y){tilt.x=x;tilt.y=y;},rect:()=>({SW,SH,RX,RY}),canvas:()=>cv};})();
+
+/* ---------------- sound: water, drips, the comb, the hum ---------------- */
+const Sound=(()=>{let AC=null,on=false,bus,hum,humG,water;
+  function init(){if(AC)return;const C=window.AudioContext||window.webkitAudioContext;if(!C)return;AC=new C();bus=AC.createGain();bus.gain.value=0;bus.connect(AC.destination);
+    const nb=AC.createBuffer(1,AC.sampleRate*3,AC.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;Sound._nb=nb;
+    const src=AC.createBufferSource();src.buffer=nb;src.loop=true;const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=380;const g=AC.createGain();g.gain.value=.05;src.connect(lp).connect(g).connect(bus);src.start();water=lp;
+    hum=[100,200,300].map((f,i)=>{const o=AC.createOscillator();o.frequency.value=f;const gg=AC.createGain();gg.gain.value=[.5,.15,.25][i];o.connect(gg);return {o,gg,m:f/50};});humG=AC.createGain();humG.gain.value=.012;for(const h of hum){h.gg.connect(humG);h.o.start();}humG.connect(bus);}
+  function set(v){if(v)init();if(!AC)return;AC.resume();on=v;bus.gain.setTargetAtTime(v?.9:0,AC.currentTime,.4);}
+  function noiseBurst(f0,f1,dur,g0){if(!on)return;const t=AC.currentTime;const s=AC.createBufferSource();s.buffer=Sound._nb;const f=AC.createBiquadFilter();f.type='bandpass';f.Q.value=1.4;f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(f1,t+dur);const g=AC.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(g0,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f).connect(g).connect(bus);s.start(t,Math.random()*2);s.stop(t+dur+.05);}
+  return {set,isOn:()=>on,
+    drip(){if(!on)return;const t=AC.currentTime;const o=AC.createOscillator();o.type='sine';o.frequency.setValueAtTime(900+Math.random()*500,t);o.frequency.exponentialRampToValueAtTime(320,t+.09);const g=AC.createGain();g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.12,t+.004);g.gain.exponentialRampToValueAtTime(.0001,t+.25);o.connect(g).connect(bus);o.start(t);o.stop(t+.3);},
+    whoosh(){noiseBurst(2600,500,.9,.08);},comb(){noiseBurst(300,1800,2.2,.1);},
+    tick(hz){if(!AC||!on)return;for(const h of hum)h.o.frequency.setTargetAtTime(h.m*hz,AC.currentTime,.3);}};})();
+
+/* ================================================================
+   other ways of seeing the same day: a cloud chamber and a smoked drum
+   both are fed by the same events as the tray, live
+   ================================================================ */
+const hm=t=>new Date(t).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'});
+const hms=t=>new Date(t).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+function lhPortland(ts){const ph=((ts%20)+20)%20;let v=0;for(let i=0;i<4;i++){const d=ph-i*2.2;v+=Math.exp(-d*d/.02);}return Math.min(1,v);}
+const meteorName=n=>(n&&n!=='Sporadic'?'a meteor of the '+n.replace(/s$/,'')+'s':'a meteor')+' over the south-west';
+/* a note on a dark ground: dot, text, time */
+function darkNote(ctx,W,x,y,col,a,b,al){if(al<=0)return;ctx.save();ctx.globalAlpha=al;ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,3,0,TAU);ctx.fill();ctx.strokeStyle='rgba(236,227,211,.45)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,7,0,TAU);ctx.stroke();
+  const fs=W<520?13.5:16;ctx.font=`italic ${fs}px "IM Fell English",serif`;const w=Math.max(ctx.measureText(a).width,60);const left=x+w+28>W;const tx=clamp(left?x-14-w:x+14,6,Math.max(6,W-w-6)),ty=y<40?y+22:y-8;
+  ctx.lineJoin='round';ctx.lineWidth=4;ctx.strokeStyle='rgba(6,6,8,.85)';ctx.strokeText(a,tx,ty);ctx.fillStyle='rgba(240,232,216,.96)';ctx.fillText(a,tx,ty);
+  if(b){ctx.font='13px "IM Fell English",serif';ctx.strokeText(b,tx,ty+16);ctx.fillStyle='rgba(200,190,170,.95)';ctx.fillText(b,tx,ty+16);}ctx.restore();}
+
+/* ---------------- the cloud chamber ---------------- */
+const Cloud=(()=>{
+let fogP=null;let cv,ctx,W=0,H=0,RX=0,RY=0,run=false,tracks=[],fogA,grain,gw=[],gusts=[],flashL=0,trackId=0,notes=[],probe=null,lastCap={},T=0;
+const acc={mu:0,e:0,sh:0};const mouse={x:-1e4,y:-1e4,on:false,down:false,mv:0};
+const COL={mu:'#d7dfeb',sh:'#d7dfeb',e:'#9fd8c4',cur:'#7fd0b4',wk:'#a9b8ff',me:'#ff9f8c',gw:'#cbb8ff'};
+function say(tr){switch(tr.type){
+  case 'mu':return 'a cosmic-ray muon, at the rate Kiel is counting';
+  case 'sh':return 'an air shower: one particle from space, broken into many';
+  case 'e':return 'an electron, curled by Earth’s magnetic field';
+  case 'cur':return 'a shiver in Earth’s magnetic field, at Hartland';
+  case 'wk':return 'someone edited “'+tr.title+'” on Wikipedia';
+  case 'me':return meteorName(tr.name);
+  case 'gw':return 'a gravitational wave'+(tr.name?', '+tr.name+',':'')+' passed through';}return '';}
+function init(canvas){cv=canvas;ctx=cv.getContext('2d');
+  fogA=document.createElement('canvas');fogA.width=fogA.height=256;{const g=fogA.getContext('2d');const img=g.createImageData(256,256);
+    for(let y=0;y<256;y++)for(let x=0;x<256;x++){let v=0,a=.55,f=4;for(let o=0;o<5;o++){const P=f;const X=x/256*P,Y=y/256*P;const ix=Math.floor(X),iy=Math.floor(Y),fx=X-ix,fy=Y-iy;const u=fx*fx*(3-2*fx),w=fy*fy*(3-2*fy);
+      const h=(a2,b2)=>hash(((a2%P)+P)%P+o*977,((b2%P)+P)%P);v+=a*(h(ix,iy)*(1-u)*(1-w)+h(ix+1,iy)*u*(1-w)+h(ix,iy+1)*(1-u)*w+h(ix+1,iy+1)*u*w);a*=.5;f*=2;}
+      const i=(y*256+x)*4;const k=Math.pow(clamp(v,0,1),2.4)*255;img.data[i]=k*.9;img.data[i+1]=k*.95;img.data[i+2]=k;img.data[i+3]=255;}g.putImageData(img,0,0);}
+  grain=document.createElement('canvas');grain.width=grain.height=128;{const g=grain.getContext('2d');const img=g.createImageData(128,128);for(let i=0;i<img.data.length;i+=4){const k=Math.random()*255;img.data[i]=img.data[i+1]=img.data[i+2]=k;img.data[i+3]=255;}g.putImageData(img,0,0);}}
+function resize(){const r=cv.getBoundingClientRect();if(r.width<2)return;const pr=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;RX=r.left;RY=r.top;cv.width=W*pr;cv.height=H*pr;ctx.setTransform(pr,0,0,pr,0,0);}
+function makeTrack(kind,opt={}){const D=Math.hypot(W,H);let x,y,a;
+  if(kind==='mu'||kind==='me'){const side=Math.random()*4|0;if(side===0){x=Math.random()*W;y=-10;}else if(side===1){x=W+10;y=Math.random()*H;}else if(side===2){x=Math.random()*W;y=H+10;}else{x=-10;y=Math.random()*H;}
+    const tx=W*(.2+Math.random()*.6),ty=H*(.2+Math.random()*.6);a=Math.atan2(ty-y,tx-x)+(Math.random()-.5)*.6;}
+  else{x=W*(.08+Math.random()*.84);y=H*(.12+Math.random()*.76);a=Math.random()*TAU;}
+  if(opt.x!==undefined){x=opt.x;y=opt.y;}if(opt.a!==undefined)a=opt.a;const I=Feed.I(Date.now());
+  const P={mu:{len:D*(.5+Math.random()*.6),w:1.5,k:.0006,wig:.004,life:7,b:.75,spd:2600},
+           e:{len:90+Math.random()*320,w:.9,k:(.02+.06*I)*(Math.random()<.5?-1:1),wig:.09,life:6,b:.7,spd:900,tight:1.012},
+           al:{len:22+Math.random()*45,w:6,k:0,wig:.01,life:6,b:1.3,spd:500},
+           me:{len:D*(.8+Math.random()*.4),w:2.6,k:.0003,wig:.003,life:11,b:1.25,spd:1400,delta:true}}[kind];
+  const t={id:trackId++,kind,type:kind==='al'?'wk':kind,x,y,a,ch:Math.random()<.5?-1:1,...P,...opt,pts:[{x,y,b:0}],run:0,age:0,alive:true,at:opt.at||Date.now()};tracks.push(t);if(tracks.length>220)tracks.shift();return t;}
+function stepTrack(t,dt){if(!t.alive)return;const n=Math.ceil(t.spd*dt/4);
+  for(let i=0;i<n&&t.alive;i++){let k=t.k;if(t.tight){t.k*=t.tight;k=t.k;}
+    if(mouse.on){const dx=t.x-mouse.x,dy=t.y-mouse.y;const d2=dx*dx+dy*dy;k+=t.ch*40/(d2/300+40)*(t.kind==='al'?.1:1);}
+    t.a+=k+(Math.random()-.5)*t.wig;t.x+=Math.cos(t.a)*4;t.y+=Math.sin(t.a)*4;t.run+=4;t.pts.push({x:t.x,y:t.y,b:t.age});
+    if(t.delta&&Math.random()<.025)makeTrack('e',{x:t.x,y:t.y,a:t.a+(Math.random()<.5?1:-1)*(.6+Math.random()),len:30+Math.random()*90,k:.06*(Math.random()<.5?-1:1),life:5,type:'me',name:t.name,at:t.at});
+    if(t.run>t.len||t.x<-40||t.y<-40||t.x>W+40||t.y>H+40)t.alive=false;}}
+function caption(tr,at,pin){const now=performance.now();if(!pin){const gap={mu:14000,sh:20000,e:14000,cur:10000}[tr.type]||0;if(now-(lastCap[tr.type]||0)<gap)return;lastCap[tr.type]=now;if(notes.filter(n=>!n.pin).length>=4)return;}
+  else notes=notes.filter(n=>!n.pin);notes.push({tr,x:at&&at.x,y:at&&at.y,a:say(tr),b:hm(tr.at),col:COL[tr.type],age:pin?.5:0,life:pin?6:7,pin});}
+function event(e){if(!run||!W)return;let tr=null;switch(e.type){
+  case 'wk':tr=makeTrack('al',{title:e.title,at:e.t});caption(tr);Sound.drip();break;
+  case 'me':tr=makeTrack('me',{name:e.name,at:e.t});flashL=.35;caption(tr);Sound.whoosh();break;
+  case 'cur':tr=makeTrack('e',{type:'cur',len:260+Math.random()*300,w:1.3,k:(.05+.08*Feed.I(Date.now()))*(Math.random()<.5?-1:1),life:8,at:e.t});caption(tr);break;
+  case 'gw':{const g={x:W*(.25+Math.random()*.5),y:H*(.25+Math.random()*.5),age:0};gw.push(g);flashL=.6;notes.push({tr:{type:'gw',name:e.name,at:e.t||Date.now()},x:g.x,y:g.y,a:say({type:'gw',name:e.name}),b:hm(e.t||Date.now()),col:COL.gw,age:0,life:9});Sound.comb();break;}}}
+// nearest track to a point on the glass
+function nearest(px,py,R){let best=null,bd=R;for(const tr of tracks){if(tr.age>tr.life*.85)continue;const st=Math.max(1,tr.pts.length/40|0);for(let i=0;i<tr.pts.length;i+=st){const p=tr.pts[i];const d=Math.hypot(p.x-px,p.y-py);if(d<bd){bd=d;best={tr,p};}}}return best;}
+function frame(dt){if(!run)return;if(!W)resize();if(!W)return;T+=dt;const t=T;const now=Date.now();
+  const cf=Feed.cf(now),I=Feed.I(now),hz=Feed.hz(now);
+  // the background rates follow the real readings
+  acc.mu+=dt*2.4*cf;acc.e+=dt*(.6+1.8*I);acc.sh+=dt/70;
+  while(acc.mu>1){acc.mu--;caption(makeTrack('mu'));}while(acc.e>1){acc.e--;caption(makeTrack('e'));}
+  if(acc.sh>1){acc.sh=0;const a=Math.random()*TAU,cx=W/2,cy=H/2,D=Math.hypot(W,H);const n=6+Math.random()*8|0;let first=null;for(let i=0;i<n;i++){const off=(Math.random()-.5)*D*.35;const x=cx-Math.cos(a)*D*.7-Math.sin(a)*off,y=cy-Math.sin(a)*D*.7+Math.cos(a)*off;const tr=makeTrack('mu',{type:'sh',x,y,a:a+(Math.random()-.5)*.03,len:D*1.4,b:.9});first=first||tr;}caption(first);}
+  for(const tr of tracks)stepTrack(tr,dt);
+  for(const g of gusts)g.age+=dt;gusts=gusts.filter(g=>g.age<1.6);for(const g of gw)g.age+=dt;gw=gw.filter(g=>g.age<6);
+  for(const tr of tracks){tr.age+=dt;for(const p of tr.pts){const age=tr.age-p.b;if(age<.15)continue;
+      const sw=Math.sin(p.y*.006+t*.3)*.18+Math.sin(p.x*.004-t*.2)*.12;p.x+=(.9+sw)*dt*6;p.y+=dt*(5+age*1.2);
+      if(mouse.on&&!mouse.down){const dx=p.x-mouse.x,dy=p.y-mouse.y,d=Math.hypot(dx,dy);if(d<90&&d>0){p.x+=dx/d*dt*14*(1-d/90);p.y+=dy/d*dt*14*(1-d/90);}}
+      for(const g of gusts){const dx=p.x-g.x,dy=p.y-g.y,d=Math.hypot(dx,dy)+1;const R=60+g.age*320;const w=Math.exp(-Math.pow((d-R)/60,2))*(1-g.age/1.6);p.x+=dx/d*w*dt*260;p.y+=dy/d*w*dt*260;}
+      for(const g of gw){const dx=p.x-g.x,dy=p.y-g.y,d=Math.hypot(dx,dy)+1;const R=g.age*420;const s=d-R;const w=Math.exp(-s*s/5000)*(1-g.age/6);p.x+=dx/d*Math.sin(s*.06)*w*dt*90;p.y+=dy/d*Math.sin(s*.06)*w*dt*90;}}}
+  tracks=tracks.filter(tr=>tr.age<tr.life);
+  // light: the lamp flickers with the grid; after dark Portland Bill's four flashes come through
+  flashL=Math.max(0,flashL-dt*.8);const lh=isDark(now)?lhPortland(now/1000):0;const flick=1+.035*Math.sin(t*(3+(hz-50)*90));const L=(1+lh*.45+flashL)*flick;
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;
+  const bg=ctx.createRadialGradient(W*.25,H*.5,0,W*.5,H*.5,Math.max(W,H)*.85);bg.addColorStop(0,'#0b0c0e');bg.addColorStop(1,'#020203');ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.globalCompositeOperation='lighter';const fs=Math.max(W,H)*1.1;
+  if(!fogP)fogP=ctx.createPattern(fogA,'repeat');for(const [sp,al,sc] of [[.012,.16,1],[-.02,.1,.6]]){const k=fs*sc/256;ctx.save();ctx.globalAlpha=al*L;ctx.translate((t*sp*fs)%(fs*sc),(t*sp*.4*fs)%(fs*sc));ctx.scale(k,k);ctx.fillStyle=fogP;ctx.fillRect(-256,-256,W/k+512,H/k+512);ctx.restore();}
+  {const lg=ctx.createLinearGradient(0,0,W*.7,0);lg.addColorStop(0,`rgba(170,195,230,${.07*L})`);lg.addColorStop(1,'rgba(170,195,230,0)');ctx.globalAlpha=1;ctx.fillStyle=lg;ctx.fillRect(0,0,W,H);}
+  ctx.lineJoin='round';ctx.lineCap='round';
+  for(const tr of tracks){const n=tr.pts.length;if(n<2)continue;const life=tr.age/tr.life;const fade=Math.pow(1-life,1.4);
+    const lamp=.55+.45*Math.exp(-tr.pts[0].x/W*1.3);const A=fade*tr.b*lamp*L;
+    const warm=lh*.5;const col=`rgb(${235+warm*20|0},${238+warm*5|0},${245-warm*30|0})`;const w=tr.w*(1+tr.age*2.4);
+    ctx.beginPath();ctx.moveTo(tr.pts[0].x,tr.pts[0].y);for(let i=1;i<n;i++)ctx.lineTo(tr.pts[i].x,tr.pts[i].y);
+    ctx.strokeStyle=col;ctx.globalAlpha=A*.08;ctx.lineWidth=w*8;ctx.stroke();ctx.globalAlpha=A*.2;ctx.lineWidth=w*3;ctx.stroke();ctx.globalAlpha=A*.7;ctx.lineWidth=Math.max(.6,w*.7);ctx.stroke();
+    if(tr.age<1.2){ctx.fillStyle='#fff';for(let i=0;i<n;i+=3){const p=tr.pts[i];const r=hash(tr.id,i);if(r>.55){ctx.globalAlpha=A*(1-tr.age/1.2)*.8*r;ctx.fillRect(p.x+(r-.5)*w*3,p.y+(hash(i,tr.id)-.5)*w*3,1,1);}}}}
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=.05;const gp=ctx.createPattern(grain,'repeat');ctx.save();ctx.translate(Math.random()*128,Math.random()*128);ctx.fillStyle=gp;ctx.fillRect(-128,-128,W+256,H+256);ctx.restore();
+  ctx.globalAlpha=1;const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.7)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+  if(mouse.on){const r=ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,60);r.addColorStop(0,'rgba(140,200,255,.10)');r.addColorStop(1,'rgba(140,200,255,0)');ctx.globalCompositeOperation='lighter';ctx.fillStyle=r;ctx.fillRect(mouse.x-60,mouse.y-60,120,120);ctx.globalCompositeOperation='source-over';}
+  // notes ride along with their trail
+  for(const n of notes){n.age+=dt;let x=n.x,y=n.y;if(x==null&&n.tr.pts){const p=n.tr.pts[Math.min(n.tr.pts.length-1,Math.max(0,(n.tr.pts.length*.3)|0))];x=p.x;y=p.y;}if(x==null)continue;
+    darkNote(ctx,W,x,y,n.col,n.a,n.b,Math.min(1,n.age*2)*clamp((n.life-n.age)/1.2,0,1));}
+  notes=notes.filter(n=>n.age<n.life);
+  if(probe&&probe.tr.age<probe.tr.life&&!notes.some(n=>n.pin))darkNote(ctx,W,probe.p.x,probe.p.y,COL[probe.tr.type],say(probe.tr),hm(probe.tr.at),.95);}
+// your hand: a magnet; click to breathe on the glass and ask what's there
+function pointer(kind,e){const x=e.clientX-RX,y=e.clientY-RY;
+  if(kind==='move'){mouse.x=x;mouse.y=y;mouse.on=true;if(mouse.down)mouse.mv+=Math.abs(e.movementX||0)+Math.abs(e.movementY||0);
+    if(e.pointerType==='mouse'&&!mouse.down){const h=nearest(x,y,26);probe=h;}}
+  else if(kind==='down'){mouse.down=true;mouse.mv=0;mouse.x=x;mouse.y=y;mouse.on=true;}
+  else if(kind==='up'){if(!mouse.down)return;mouse.down=false;const h=nearest(mouse.x,mouse.y,40);if(h){caption(h.tr,{x:h.p.x,y:h.p.y},true);probe=null;}gusts.push({x:mouse.x,y:mouse.y,age:0});if(e.pointerType!=='mouse')mouse.on=false;}
+  else if(kind==='leave'){mouse.on=false;probe=null;}}
+return {init,resize,frame,event,pointer,start(){run=true;resize();},stop(){run=false;notes=[];probe=null;}};})();
+
+/* ---------------- the smoked drum: six pens, read by candlelight ---------------- */
+const Drum=(()=>{
+let cv,ctx,W=0,H=0,RX=0,RY=0,run=false,soot,offset=0,offV=0,drag=null,cache=new Map(),evCache=new Map(),smoke=[],gwInject=null,liveWk=[],notes=[],hover=null,tn=0;
+const mouse={x:-1,y:-1,on:false};
+const SEC_PX=1.2; // seconds of time per pixel of paper
+const CH=[
+ {k:'H',label:'Magnetic force',sub:'Hartland, Devon',col:'#9fd8c4'},
+ {k:'N',label:'Neutrons',sub:'cosmic rays, Kiel',col:'#e0b060'},
+ {k:'F',label:'Mains',sub:'National Grid',col:'#e8d8b0'},
+ {k:'M',label:'Meteors',sub:'over the south-west',col:'#ff9f8c'},
+ {k:'W',label:'Edits',sub:'obscure Wikipedia articles',col:'#a9b8ff'},
+ {k:'G',label:'Gravitation',sub:'LIGO, Virgo and KAGRA',col:'#cbb8ff'}];
+const fmt=n=>Math.round(n).toLocaleString('en-GB');const sgn=n=>(n>=0?'+':'−')+Math.abs(n).toFixed(0);
+function init(canvas){cv=canvas;ctx=cv.getContext('2d');
+  soot=document.createElement('canvas');soot.width=soot.height=256;{const g=soot.getContext('2d');const img=g.createImageData(256,256);
+    for(let y=0;y<256;y++)for(let x=0;x<256;x++){const i=(y*256+x)*4;const v=vnoise(x/9,y*7+3)*.5+vnoise(x/3,y*13+1)*.3+Math.random()*.2;const k=8+v*18;img.data[i]=k*1.05;img.data[i+1]=k*.95;img.data[i+2]=k*.85;img.data[i+3]=255;}g.putImageData(img,0,0);}}
+function resize(){const r=cv.getBoundingClientRect();if(r.width<2)return;const pr=Math.min(devicePixelRatio||1,2);W=r.width;H=r.height;RX=r.left;RY=r.top;cv.width=W*pr;cv.height=H*pr;ctx.setTransform(pr,0,0,pr,0,0);}
+// the readings, from the day's file where we have it
+function inDay(t){return Feed.day&&App.t0&&t>=App.t0&&t<App.t0+DY;}
+function sample(b){if(cache.has(b))return cache.get(b);const t=b*SEC_PX*1000;let hv,n;
+  const sH=inDay(t)?Feed.series('magH',t):null,sN=inDay(t)?Feed.series('neutron',t):null;const st=(sH==null||sN==null)?solarStorm(t):null;
+  hv=(sH!=null?sH:magH(t,st))+2.5*fbm(b/25,77);n=(sN!=null?sN:neutron(t,st))+((vnoise(b/6,11)-.5)*2+(hash(b,11)-.5)*.5)*30;
+  const v={H:hv,N:n,F:Feed.hz(t)};cache.set(b,v);if(cache.size>9000)cache.delete(cache.keys().next().value);return v;}
+function minuteEvents(m){if(evCache.has(m))return evCache.get(m);const all=Feed.events(m*MN,(m+1)*MN).filter(e=>e.type==='me'||e.type==='gw'||(e.type==='wk'&&!Feed.liveWiki));
+  const out=all.filter(e=>e.type!=='me'||(e.b>.6));evCache.set(m,out);if(evCache.size>400)evCache.delete(evCache.keys().next().value);return out;}
+function eventsIn(t0,t1){const out=[];for(let m=Math.floor(t0/MN);m<=Math.floor(t1/MN);m++){if(m*MN>Date.now())break;for(const e of minuteEvents(m))if(e.t>=t0&&e.t<t1)out.push(e);}
+  for(const e of liveWk)if(e.t>=t0&&e.t<t1)out.push(e);if(gwInject&&gwInject.t>=t0&&gwInject.t<t1)out.push(gwInject);return out;}
+function chirp(ds){const x=ds/(SEC_PX*120);if(x<-1)return 0;if(x<0){const tau=-x;return Math.min(1,.18*Math.pow(tau+.002,-.25))*Math.cos(70*Math.pow(tau,.625));}return Math.exp(-x*10)*Math.cos(-x*90);}
+function event(e){if(e.type==='wk'&&e.live)liveWk.push({...e,t:Date.now()});if(liveWk.length>400)liveWk.shift();
+  if(!run)return;const row={me:3,wk:4,gw:5}[e.type];if(row==null)return;
+  notes.push({row,a:e.type==='wk'?'someone edited “'+e.title+'”':e.type==='me'?meteorName(e.name):'a gravitational wave'+(e.name?', '+e.name:''),b:hm(e.t||Date.now()),age:0,life:7});
+  if(e.type==='me')Sound.whoosh();else if(e.type==='wk')Sound.drip();else Sound.comb();}
+function layout(){const narrow=W<560;const dx0=narrow?10:Math.max(150,W*.16),dx1=narrow?W-10:W-Math.max(130,W*.12),dy0=narrow?16:H*.07,dy1=H-(narrow?40:52);const penX=dx1-(narrow?24:50);return {narrow,dx0,dx1,dy0,dy1,penX,dh:dy1-dy0,rh:(dy1-dy0)/CH.length};}
+function frame(dt){if(!run)return;if(!W)resize();if(!W)return;tn+=dt;
+  if(!drag){offset=Math.max(0,offset+offV);offV*=Math.pow(.02,dt);}
+  const maxOff=App.t0?(Date.now()-App.t0)/1000:DY/1000;offset=Math.min(offset,maxOff);
+  const T=Date.now()-offset*1000;const {narrow,dx0,dx1,dy0,dy1,penX,dh,rh}=layout();const rows=CH.length;
+  ctx.globalCompositeOperation='source-over';ctx.globalAlpha=1;ctx.fillStyle='#0a0807';ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.beginPath();ctx.rect(dx0,dy0,dx1-dx0,dh);ctx.clip();
+  const pat=ctx.createPattern(soot,'repeat');ctx.save();ctx.translate(-(T/1000/SEC_PX)%256,0);ctx.fillStyle=pat;ctx.fillRect(dx0-256,dy0,dx1-dx0+512,dh);ctx.restore();
+  ctx.strokeStyle='rgba(210,190,160,.07)';ctx.lineWidth=1;for(let r=0;r<rows;r++){const y=dy0+rh*(r+.5);ctx.beginPath();ctx.moveTo(dx0,y);ctx.lineTo(dx1,y);ctx.stroke();}
+  {const tick=60/SEC_PX;const off=((T/1000/SEC_PX)%tick);for(let x=penX-off;x>dx0;x-=tick){ctx.beginPath();ctx.moveTo(x,dy0);ctx.lineTo(x,dy0+6);ctx.moveTo(x,dy1-6);ctx.lineTo(x,dy1);ctx.stroke();}}
+  const b0=Math.floor(T/1000/SEC_PX);const cols=Math.floor(penX-dx0);const tL=(b0-cols)*SEC_PX*1000;
+  const cur0N=sample(b0).N;const ys=CH.map(()=>new Float32Array(cols+1));
+  const evs=eventsIn(tL-150e3,T+1);const gws=evs.filter(e=>e.type==='gw');
+  for(let i=0;i<=cols;i++){const b=b0-i;const v=sample(b);ys[0][i]=-clamp(v.H/22,-1.4,1.4);ys[1][i]=-clamp((v.N-cur0N)/70,-1.4,1.4);ys[2][i]=-clamp((v.F-50)/.08,-1.4,1.4);}
+  // ticks: meteors and edits as pen strikes, gravitational waves as a chirp
+  const ticks=[];for(const e of evs){if(e.t>T||e.t<tL)continue;const i=Math.round((T-e.t)/1000/SEC_PX);if(i<0||i>cols)continue;
+    if(e.type==='me'){const k=clamp(e.b||.5,.3,1)*1.3;for(let d=-2;d<=2;d++)if(i+d>=0&&i+d<=cols)ys[3][i+d]=Math.min(ys[3][i+d],-k*(1-Math.abs(d)/3));ticks.push({row:3,i,e});}
+    if(e.type==='wk'){for(let d=-1;d<=1;d++)if(i+d>=0&&i+d<=cols)ys[4][i+d]=Math.min(ys[4][i+d],-.9*(1-Math.abs(d)/2));ticks.push({row:4,i,e});}}
+  for(const g of gws){for(let i=0;i<=cols;i++){const tt=(b0-i)*SEC_PX*1000;if(tt>T)continue;ys[5][i]+=-chirp((tt-g.t)/1000)*1.3;}const i=Math.round((T-g.t)/1000/SEC_PX);if(i>=0&&i<=cols)ticks.push({row:5,i,e:g});}
+  for(let i=0;i<=cols;i++){ys[5][i]+=(hash(b0-i,5)-.5)*.06;ys[3][i]+=(hash(b0-i,6)-.5)*.04;ys[4][i]+=(hash(b0-i,7)-.5)*.04;}
+  for(let r=0;r<rows;r++){const yb=dy0+rh*(r+.5),amp=rh*.36;ctx.beginPath();for(let i=0;i<=cols;i++){const x=penX-i,y=yb+ys[r][i]*amp+(hash(b0-i,r+30)-.5)*.6;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.strokeStyle='rgba(235,222,198,.18)';ctx.lineWidth=3.2;ctx.stroke();ctx.strokeStyle='rgba(240,228,205,.88)';ctx.lineWidth=1.05;ctx.stroke();}
+  const cg=ctx.createLinearGradient(0,dy0,0,dy1);cg.addColorStop(0,'rgba(0,0,0,.7)');cg.addColorStop(.14,'rgba(0,0,0,.08)');cg.addColorStop(.5,'rgba(255,240,220,.03)');cg.addColorStop(.86,'rgba(0,0,0,.08)');cg.addColorStop(1,'rgba(0,0,0,.75)');ctx.fillStyle=cg;ctx.fillRect(dx0,dy0,dx1-dx0,dh);
+  ctx.restore();
+  // brass end caps and pens
+  if(!narrow)for(const [x,w] of [[dx0-22,22],[dx1,22]]){const g=ctx.createLinearGradient(x,0,x+w,0);g.addColorStop(0,'#3a2a14');g.addColorStop(.45,'#b08a4a');g.addColorStop(.6,'#e2c58a');g.addColorStop(1,'#4a3418');ctx.fillStyle=g;ctx.fillRect(x,dy0-12,w,dh+24);}
+  const cur=sample(b0);const lastMe=evs.filter(e=>e.type==='me'&&e.t<=T).pop(),lastWk=evs.filter(e=>e.type==='wk'&&e.t<=T).pop(),lastGw=gws.filter(e=>e.t<=T).pop();
+  const vals=[sgn(cur.H)+' nT',fmt(cur.N)+' a minute',cur.F.toFixed(3)+' Hz',lastMe&&T-lastMe.t<90e3?'a meteor':'—',lastWk&&T-lastWk.t<60e3?'an edit':'—',lastGw&&T-lastGw.t<120e3?'a merger':'quiet'];
+  // the candle: the room is dark except near it; Portland Bill's beam passes the window after dark
+  const lh=isDark(Date.now())?lhPortland(Date.now()/1000):0;const flame=.8+.2*Math.sin(tn*9)*Math.sin(tn*5.3+1);
+  ctx.globalCompositeOperation='multiply';ctx.fillStyle=`rgba(${150+lh*80|0},${132+lh*70|0},${112+lh*50|0},1)`;ctx.fillRect(0,0,W,H);
+  ctx.globalCompositeOperation='lighter';const cx=mouse.on?mouse.x:W*.6,cy=mouse.on?mouse.y:H*.55;
+  {const R=Math.max(260,W*.28)*flame;const g=ctx.createRadialGradient(cx,cy,0,cx,cy,R);g.addColorStop(0,`rgba(255,190,120,${.45*flame})`);g.addColorStop(.35,`rgba(220,140,70,${.18*flame})`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(cx-R,cy-R,R*2,R*2);
+    const fx=cx,fy=cy-6;ctx.globalCompositeOperation='source-over';const fl=ctx.createRadialGradient(fx,fy-8,0,fx,fy-6,16);fl.addColorStop(0,'rgba(255,250,230,1)');fl.addColorStop(.4,'rgba(255,200,110,.9)');fl.addColorStop(1,'rgba(255,120,40,0)');
+    ctx.fillStyle=fl;ctx.beginPath();ctx.moveTo(fx,fy-26-4*Math.sin(tn*11));ctx.quadraticCurveTo(fx+8+Math.sin(tn*7)*2,fy-6,fx,fy+4);ctx.quadraticCurveTo(fx-8+Math.sin(tn*6)*2,fy-6,fx,fy-26-4*Math.sin(tn*11));ctx.fill();
+    if(Math.random()<.5)smoke.push({x:fx,y:fy-26,vx:(Math.random()-.5)*8,age:0});}
+  ctx.globalCompositeOperation='lighter';for(const s of smoke){s.age+=dt;s.y-=dt*30;s.x+=s.vx*dt+Math.sin(s.age*3)*.3;const a=.05*(1-s.age/3);ctx.fillStyle=`rgba(200,190,180,${a})`;ctx.beginPath();ctx.arc(s.x,s.y,3+s.age*8,0,TAU);ctx.fill();}smoke=smoke.filter(s=>s.age<3);
+  ctx.globalCompositeOperation='source-over';
+  // pens, plates and readings, drawn after the light so they stay legible
+  for(let r=0;r<rows;r++){const yb=dy0+rh*(r+.5),amp=rh*.36;const ny=yb+ys[r][0]*amp;
+    ctx.fillStyle='rgba(255,240,210,.95)';ctx.beginPath();ctx.arc(penX,ny,1.8,0,TAU);ctx.fill();
+    if(!narrow){const px=dx1+40,py=yb-rh*.28;ctx.strokeStyle='rgba(200,165,100,.85)';ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(penX+2,ny);ctx.stroke();ctx.fillStyle='#e8c98a';ctx.beginPath();ctx.arc(px,py,2.6,0,TAU);ctx.fill();
+      ctx.font='italic 18px "IM Fell English",serif';ctx.fillStyle='#e2c08a';ctx.fillText(CH[r].label,14,yb-3);ctx.font='13px "IM Fell English",serif';ctx.fillStyle='rgba(226,192,138,.62)';ctx.fillText(CH[r].sub,14,yb+14);
+      ctx.font='14px "IM Fell English",serif';ctx.fillStyle='rgba(240,228,205,.85)';ctx.fillText(vals[r],dx1+52,yb+5);}
+    else{ctx.font='italic 13px "IM Fell English",serif';ctx.fillStyle='rgba(226,192,138,.9)';ctx.fillText(CH[r].label+' · '+vals[r],dx0+6,yb-rh*.36);}}
+  ctx.font=`italic ${narrow?13:15}px "IM Fell English",serif`;ctx.fillStyle='rgba(226,192,138,.8)';ctx.textAlign='center';
+  ctx.fillText(new Date(T).toLocaleString('en-GB',{weekday:'long',hour:'2-digit',minute:'2-digit',second:'2-digit',timeZone:'Europe/London'})+(offset>2?' · the drum turned back':' · now'),(dx0+dx1)/2,dy1+(narrow?24:30));
+  if(!narrow){ctx.font='12.5px "IM Fell English",serif';ctx.fillStyle='rgba(226,192,138,.45)';ctx.fillText('a tick each minute along the edge · the gravitation pen is magnified so the chirp can be seen',(dx0+dx1)/2,dy1+46);}ctx.textAlign='left';
+  // live notes by the pen
+  for(const n of notes){n.age+=dt;const yb=dy0+rh*(n.row+.5);darkNote(ctx,W,penX,yb-rh*.2,CH[n.row].col,n.a,n.b,Math.min(1,n.age*2)*clamp((n.life-n.age)/1.2,0,1));}notes=notes.filter(n=>n.age<n.life);
+  // reading the paper under your candle
+  if(mouse.on&&mouse.x>dx0&&mouse.x<penX&&mouse.y>dy0&&mouse.y<dy1){const r=clamp((mouse.y-dy0)/rh|0,0,rows-1);const i=Math.round(penX-mouse.x);const tt=T-i*SEC_PX*1000;const v=sample(b0-i);let a,b=hms(tt);
+    const near=ticks.filter(k=>k.row===r&&Math.abs(k.i-i)<8).sort((p,q)=>Math.abs(p.i-i)-Math.abs(q.i-i))[0];
+    if(r===0)a='magnetic force at Hartland, '+sgn(v.H)+' nT from quiet';else if(r===1)a='cosmic-ray neutrons at Kiel, '+fmt(v.N)+' a minute';else if(r===2)a='the National Grid at '+v.F.toFixed(3)+' Hz';
+    else if(near){const e=near.e;a=e.type==='me'?meteorName(e.name):e.type==='wk'?'someone edited “'+e.title+'”':'a gravitational wave'+(e.name?', '+e.name:'');b=hm(e.t);}
+    else a=['','','','no meteor seen at this moment','no edit at this moment','spacetime quiet'][r];
+    const yb=dy0+rh*(r+.5);ctx.strokeStyle='rgba(255,230,190,.25)';ctx.beginPath();ctx.moveTo(mouse.x,dy0);ctx.lineTo(mouse.x,dy1);ctx.stroke();darkNote(ctx,W,mouse.x,yb+ys[r][Math.max(0,Math.min(cols,i))]*rh*.36,CH[r].col,a,b,.95);}}
+function pointer(kind,e){const x=e.clientX-RX,y=e.clientY-RY;
+  if(kind==='down'){drag={x,o:offset,mv:0};offV=0;mouse.x=x;mouse.y=y;mouse.on=true;}
+  else if(kind==='move'){mouse.x=x;mouse.y=y;mouse.on=true;if(drag){drag.mv+=Math.abs(x-drag.lx||0);drag.lx=x;const no=Math.max(0,drag.o+(x-drag.x)*SEC_PX*4);offV=(no-offset);offset=no;}}
+  else if(kind==='up'){drag=null;if(e.pointerType!=='mouse'){/* keep the candle where the finger lifted, briefly */setTimeout(()=>{mouse.on=false;},2500);}}
+  else if(kind==='leave'){mouse.on=false;}
+  else if(kind==='dbl'){offset=0;offV=0;}}
+return {init,resize,frame,event,pointer,start(){run=true;resize();},stop(){run=false;notes=[];},gw(){gwInject={type:'gw',t:Date.now()-offset*1000,name:''};}};})();
+
+/* ---------------- the clock: catch up, live, replay, render ---------------- */
+const App={mode:'idle',date:null,t0:0,simT:0,stepI:0,target:0,live:false,onDone:null};
+const $=id=>document.getElementById(id);
+function setPlate(dateStr,state){$('no').textContent='Sheet No. '+sheetNo(dateStr).toLocaleString('en-GB');$('dt').textContent=fmtDate(dateStr);$('bg').textContent=state;}
+async function openDay(dateStr,{live=false,fast=8}={}){
+  App.mode='loading';await Feed.load(dateStr);
+  App.date=dateStr;App.t0=midnightLondon(dateStr);Tray.reset(dateStr);App.stepI=0;App.live=live;App.fast=fast;
+  const end=live?Date.now():App.t0+DY;App.target=Math.round((end-App.t0)/DY*STEPS_PER_DAY);App.simT=App.t0;
+  setPlate(dateStr,live?'Begun at midnight, catching up':'Pulled at midnight');
+  document.body.classList.toggle('past',!live);App.mode='replay';}
+function advanceReplay(n){if(!Tray.ready()){Tray.resize();return;}for(let k=0;k<n&&App.stepI<App.target;k++){const a=App.t0+App.stepI/STEPS_PER_DAY*DY,b=App.t0+(App.stepI+1)/STEPS_PER_DAY*DY;
+    for(const e of Feed.events(a,b))Tray.apply(e,false);Tray.step(1/60,b,1,1);App.stepI++;App.simT=b;}
+  if(App.stepI>=App.target){if(App.live){App.mode='live';App.simT=Date.now();setPlate(App.date,'Begun at midnight, still wet');}else{App.mode='done';if(App.onDone)App.onDone();}}}
+/* ---------------- which way of seeing ---------------- */
+const VIEWS={ink:{hash:'#',dark:false},cloud:{hash:'#cloud-chamber',dark:true,mod:Cloud},drum:{hash:'#magnetogram',dark:true,mod:Drum}};
+const COARSE=matchMedia('(pointer:coarse)').matches;
+const HINT={ink:COARSE?'Drag to stir. Tap any mark to see what made it.':'Drag to stir. Point at any mark to see what made it.',
+  cloud:COARSE?'Your finger is a magnet. Tap a trail to see what made it.':'Your pointer is a magnet. Point at a trail to see what made it; click to breathe on the glass.',
+  drum:COARSE?'Drag the drum back through today. Touch a trace to read it.':'Your pointer is the candle. Drag the drum back through today; point at a trace to read it.'};
+const INTRO={ink:['Nobody is marbling this sheet.','Things happening right now, out in the world and too faint to feel, are dropping the ink. Each note says what has just fallen.'],
+  cloud:['Nothing in this chamber is staged.','Every trail is something passing through right now, at the rate the instruments are counting it. Each note says what it was.'],
+  drum:['Six pens, one drum.','Each pen writes down something nobody here can feel, as it happens. Drag the drum to turn back through today.']};
+let VIEW='ink';const seenIntro={};let introT=0;
+function setView(v){if(!VIEWS[v])v='ink';if(v===VIEW&&document.body.classList.contains('v-'+v))return;const prev=VIEWS[VIEW];if(prev.mod)prev.mod.stop();VIEW=v;
+  for(const k in VIEWS)document.body.classList.toggle('v-'+k,k===v);document.body.classList.toggle('v-dark',VIEWS[v].dark);
+  document.querySelectorAll('#views a').forEach(a=>a.classList.toggle('on',a.dataset.v===v));
+  const h=document.querySelector('#acts .hint');if(h)h.textContent=HINT[v];
+  document.querySelectorAll('#pam .back,#arch .close').forEach(a=>a.setAttribute('href',VIEWS[v].hash));
+  if(VIEWS[v].mod)VIEWS[v].mod.start();Tray.plainMark(VIEWS[v].dark);
+  if(!seenIntro[v]){seenIntro[v]=1;intro.querySelector('.a').textContent=INTRO[v][0];intro.querySelector('.b').textContent=INTRO[v][1];if(v!=='ink'){intro.classList.remove('gone');introGone=false;introT=performance.now();}}
+  else dropIntro();}
+function toViews(e){Drum.event(e);if(VIEW==='cloud')Cloud.event(e);}
+let lastF=performance.now(),ambAcc=0,liveAt=0;const intro=$('intro');let introGone=false;if(RENDER)intro.style.display='none';const dropIntro=()=>{if(!introGone){introGone=true;intro.classList.add('gone');}};
+function frame(now){const dt=Math.min(.05,(now-lastF)/1000);lastF=now;if(!Tray.ready()){Tray.resize();deckle();}
+  if(App.mode==='replay')advanceReplay(RENDER?40:App.fast);
+  if(!introGone&&VIEW==='ink'){if(App.mode==='live'){if(!liveAt){liveAt=now;App.captions=0;}if((now-liveAt>6000&&App.captions>=2)||now-liveAt>16000)dropIntro();}else if(App.mode==='done'&&!App.live)dropIntro();}
+  else if(App.mode==='live'){const t=Date.now();if(londonDate(t)!==App.date){openDay(londonDate(t),{live:true});}else{for(const e of Feed.events(App.simT,t))if(!(e.type==='wk'&&Feed.liveWiki)){Tray.apply(e,VIEW==='ink');toViews(e);}App.simT=t;Tray.drift(dt,t);ambAcc+=dt*1.3*Feed.cf(t);while(ambAcc>1){ambAcc--;Tray.apply({type:'cr',x:Math.random(),y:Math.random(),s:Math.random(),puff:true},VIEW==='ink');}Tray.step(dt,t,dt*1000/(DY/STEPS_PER_DAY),.04*Math.min(3,dt*60));Sound.tick(Feed.hz(t));}}
+  else if(App.mode==='done'){if(Tray.busy())Tray.step(dt,App.t0+DY-1,0,0);}
+  if(App.mode!=='loading'&&VIEW==='ink')Tray.draw(dt);
+  if(VIEWS[VIEW].mod)VIEWS[VIEW].mod.frame(dt);
+  if(VIEW!=='ink'&&!introGone&&now-introT>9000)dropIntro();
+  if(RENDER&&App.mode==='done'){window.__sheetDone=true;return;}
+  requestAnimationFrame(frame);}
+
+setInterval(()=>{if(App.mode==='live')Feed.load(App.date,true);},10*60e3);
+/* live Wikipedia edits, straight from the stream */
+const WK_RX=/moth|beetle|lichen|moss|fung|fern|lighthouse|shipwreck|chapel|abbey|barrow|tumulus|folklore|ghost|fossil|ammonite|comet|meteor|tide|cliff|hillfort|bog|marsh|owl|toad|newt|eel|snail|extinct|ruin|hamlet|mill|canal|bell|orrery|sundial|beacon/i;
+if(!RENDER){try{const es=new EventSource('https://stream.wikimedia.org/v2/stream/recentchange');let lastW=0;
+  es.onmessage=ev=>{try{const d=JSON.parse(ev.data);if(d.wiki!=='enwiki'||d.type!=='edit'||d.namespace!==0||d.bot||!WK_RX.test(d.title))return;Feed.liveWiki=true;const now=Date.now();if(App.mode!=='live'||now-lastW<4000)return;lastW=now;
+    const ev={type:'wk',live:true,t:now,x:.12+Math.random()*.76,y:.18+Math.random()*.68,title:d.title,bytes:d.length?(d.length.new-d.length.old):0};Tray.apply(ev,VIEW==='ink');toViews(ev);}catch(_){}};
+  es.onerror=()=>{Feed.liveWiki=false;};}catch(_){}}
+/* ---------------- your hand: stir and drop ---------------- */
+function hands(){const cv=Tray.canvas();if(!cv)return;let down=false,moved=0,px=0,py=0;
+  const pos=e=>{const r=Tray.rect();return [(e.clientX-r.RX)/r.SW,1-(e.clientY-r.RY)/r.SH];};
+  cv.addEventListener('pointerdown',e=>{down=true;moved=0;[px,py]=pos(e);dropIntro();});
+  let hv=0;cv.addEventListener('pointermove',e=>{if(down||e.pointerType!=='mouse')return;const n=performance.now();if(n-hv<120)return;hv=n;const [x,y]=pos(e);if(App.mode==='live'||App.mode==='done')dropIntro();Tray.user('hover',x,y);});
+  cv.addEventListener('pointerleave',()=>Tray.user('leave'));
+  cv.addEventListener('pointermove',e=>{if(!down)return;const [x,y]=pos(e);moved+=Math.abs(x-px)+Math.abs(y-py);Tray.user('stir',x,y,x-px,y-py);px=x;py=y;});
+  addEventListener('pointerup',()=>{if(down&&moved<.004)Tray.user('drop',px,py);down=false;});}
+
+/* ---------------- tilt the tray (phones) ---------------- */
+const tiltBtn=$('tilt');
+if(matchMedia('(pointer:coarse)').matches&&typeof DeviceOrientationEvent!=='undefined')tiltBtn.style.display='';
+tiltBtn.addEventListener('click',async()=>{try{if(typeof DeviceOrientationEvent.requestPermission==='function'){const r=await DeviceOrientationEvent.requestPermission();if(r!=='granted')throw 0;}
+  addEventListener('deviceorientation',e=>{if(e.beta==null)return;const portrait=(screen.orientation?screen.orientation.angle:window.orientation||0)%180===0;
+    let gx=clamp((portrait?e.gamma:e.beta)/45,-1,1),gy=clamp((portrait?e.beta-40:-e.gamma)/45,-1,1);Tray.setTilt(gx*14,-gy*14);});tiltBtn.textContent='Tilting';}catch(_){tiltBtn.textContent='Tilt unavailable here';}});
+
+/* ---------------- sound ---------------- */
+$('snd').addEventListener('click',()=>{Sound.set(!Sound.isOn());$('snd').textContent=Sound.isOn()?'Sound on':'Sound off';});
+
+/* ---------------- the archive and turning to a day ---------------- */
+let INDEX=null;
+async function loadIndex(){if(INDEX)return INDEX;try{const r=await fetch('data/index.json',{cache:'no-store'});if(r.ok)INDEX=await r.json();}catch(_){}return INDEX=INDEX||{sheets:[]};}
+async function showArchive(){const idx=await loadIndex();const list=$('arch-list');list.innerHTML='';const today=londonDate(Date.now());
+  const days=[];for(let i=1;i<=21;i++){days.push(londonDate(Date.now()-i*DY));}
+  const saved=Object.fromEntries((idx.sheets||[]).map(s=>[s.date,s]));
+  for(const d of days){const s=saved[d];let line,specimen=false;if(s&&s.ledger)line=s.ledger;else{const prev=Feed.day,pd=Feed.date;Feed.day=null;line=specimenLedger(Feed.summary(d));Feed.day=prev;Feed.date=pd;specimen=true;}
+    const a=document.createElement('a');a.className='sh';a.href='#day-'+d;
+    a.innerHTML=(s&&s.img?`<img src="${s.img}" alt="">`:`<span class="sw" style="--h:${(sheetNo(d)*47)%360}"></span>`)+`<span class="no">No. ${sheetNo(d).toLocaleString('en-GB')}</span><span class="dd">${fmtDate(d)}</span><span class="ln${specimen?' spec':''}">${line}</span>`;list.appendChild(a);}
+  $('arch').classList.add('on');}
+function route(){const h=location.hash;const vh=h==='#cloud-chamber'?'cloud':h==='#magnetogram'?'drum':null;
+  if(vh){setView(vh);if(App.date!==londonDate(Date.now())||!App.live)openDay(londonDate(Date.now()),{live:true});$('pam').classList.remove('on');$('arch').classList.remove('on');return;}
+  if(h===''||h==='#'||/^#day-/.test(h))setView('ink');$('pam').classList.toggle('on',h==='#on-the-word');if(h==='#on-the-word')$('pam').scrollTop=0;
+  if(h==='#sheets')showArchive();else $('arch').classList.remove('on');
+  const m=h.match(/^#day-(\d{4}-\d{2}-\d{2})$/);if(m){const d=m[1];if(d>=londonDate(Date.now())){location.hash='';return;}openDay(d,{live:false,fast:10});}
+  if(h===''||h==='#'){if(App.date!==londonDate(Date.now())||!App.live)openDay(londonDate(Date.now()),{live:true});}}
+$('goday').addEventListener('click',()=>{const v=$('dayin').value;if(!v)return;if(v>=londonDate(Date.now())){location.hash='';return;}location.hash='#day-'+v;});
+$('dayin').max=londonDate(Date.now()-DY);
+addEventListener('hashchange',route);
+document.getElementById('wave').addEventListener('click',()=>{if(VIEW==='ink')Tray.apply({type:'gw',a:Math.random()*TAU},true);else if(VIEW==='cloud')Cloud.event({type:'gw',t:Date.now()});else{Drum.gw();Drum.event({type:'gw',t:Date.now()});}});
+
+/* ---------------- the sheet: deckled edge, crop marks ---------------- */
+const wrap=$('sheetwrap'),sheet=$('sheet');
+function deckle(){if(RENDER)return;const r=wrap.getBoundingClientRect(),pts=[];const j=()=>(Math.random()*1.6).toFixed(2);const n=Math.round(r.width/14),m=Math.round(r.height/14);
+  for(let i=0;i<=n;i++)pts.push(`${(i/n*100).toFixed(2)}% ${j()}px`);for(let i=1;i<=m;i++)pts.push(`calc(100% - ${j()}px) ${(i/m*100).toFixed(2)}%`);
+  for(let i=n-1;i>=0;i--)pts.push(`${(i/n*100).toFixed(2)}% calc(100% - ${j()}px)`);for(let i=m-1;i>0;i--)pts.push(`${j()}px ${(i/m*100).toFixed(2)}%`);
+  sheet.style.clipPath=`polygon(${pts.join(',')})`;const o=10;const P=[[r.left-o-22,r.top-o-22],[r.right+o,r.top-o-22],[r.left-o-22,r.bottom+o],[r.right+o,r.bottom+o]];
+  document.querySelectorAll('.crop').forEach((e,i)=>{e.style.left=P[i][0]+'px';e.style.top=P[i][1]+'px';});}
+
+/* ---------------- start ---------------- */
+if(RENDER)document.body.classList.add('render');
+addEventListener('error',e=>{const p=document.getElementById('err');if(p){p.textContent='Something went wrong drawing the tray: '+(e.message||e);p.style.display='block';}});
+Tray.init($('cgl'),$('cov'));Tray.wordmark($('wm'));hands();
+{const c2=$('c2d');Cloud.init(c2);Drum.init(c2);const go=k=>e=>{const m=VIEWS[VIEW].mod;if(m){if(k==='down')dropIntro();m.pointer(k,e);}};
+  c2.addEventListener('pointerdown',go('down'));c2.addEventListener('pointermove',go('move'));addEventListener('pointerup',go('up'));c2.addEventListener('pointerleave',go('leave'));c2.addEventListener('dblclick',go('dbl'));
+  new ResizeObserver(()=>{Cloud.resize();Drum.resize();}).observe(c2);addEventListener('scroll',()=>{Cloud.resize();Drum.resize();});}
+if(!Tray.ok()){sheet.innerHTML='<p style="padding:40px;color:#3a2b1f;font-size:20px">This sheet needs WebGL 2, which this browser has switched off.</p>';}
+else{deckle();Tray.resize();
+  addEventListener('resize',()=>{deckle();Tray.resize();});
+  if(window.ResizeObserver)new ResizeObserver(()=>{deckle();Tray.resize();}).observe(wrap);
+  document.fonts.ready.then(()=>{setView('ink');if(RENDER){openDay(RENDER,{live:false});}else route();requestAnimationFrame(frame);});}
+
+})();
+</script>
+</body>
+</html>
