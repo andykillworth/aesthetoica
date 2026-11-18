@@ -36,32 +36,36 @@ HAPI = "https://imag-data.bgs.ac.uk/GIN_V1/hapi"
 def hartland(start, end):
     """Hartland (HAD) one-minute data from the INTERMAGNET HAPI server.
     Returns 10-minute H deviations (nT) and a rough Kp-like activity estimate."""
-    cat = S.get(f"{HAPI}/catalog", timeout=T).json()["catalog"]
-    ids = [c["id"] for c in cat if c["id"].lower().startswith("had/") and "PT1M" in c["id"]]
-    if not ids:
-        raise RuntimeError("no HAD PT1M dataset in catalog")
-    # try each HAD minute dataset in turn; the server refuses some combinations, and says why
-    order = sorted(ids, key=lambda i: (0 if "best-avail" in i else 1 if "reported" in i else 2, 0 if "xyz" in i.lower() else 1 if "native" in i.lower() else 2))
+    # BGS's own HAPI server carries Hartland in near real time; INTERMAGNET's copy runs about ten days behind
+    tries = [("https://wdcapi.bgs.ac.uk/hapi", ds) for ds in ("had/PT1M/xyz", "had/PT1M/hdz", "had/PT1M/original")]
+    try:
+        cat = S.get(f"{HAPI}/catalog", timeout=T).json()["catalog"]
+        ids = [c["id"] for c in cat if c["id"].lower().startswith("had/") and "PT1M" in c["id"]]
+        ids.sort(key=lambda i: (0 if "best-avail" in i else 1 if "adjusted" in i else 2, 0 if "xyz" in i.lower() else 1))
+        tries += [(HAPI, ds) for ds in ids[:3]]
+    except Exception as e:
+        print(f"[hartland] INTERMAGNET catalogue unavailable: {e}")
     js, why = None, []
-    for ds in order:
-        stop = min(end, datetime.now(timezone.utc).replace(second=0, microsecond=0))
-        r = S.get(f"{HAPI}/data", params={"dataset": ds, "start": iso(start), "stop": iso(stop), "format": "json", "include": "header"}, timeout=60)
-        if r.ok:
-            js = r.json()
-            if js.get("data"):
-                print(f"[hartland] using {ds}")
+    for server, ds in tries:
+        try:
+            inf = S.get(f"{server}/info", params={"dataset": ds}, timeout=T).json()
+            if inf.get("status", {}).get("code", 1200) != 1200:
+                why.append(f"{server.split('/')[2]} {ds}: {inf['status'].get('message')}"); continue
+            held = datetime.fromisoformat(inf["stopDate"].replace("Z", "+00:00"))
+            stop = min(end, held, datetime.now(timezone.utc).replace(second=0, microsecond=0))
+            if stop <= start:
+                why.append(f"{server.split('/')[2]} {ds}: holds data only to {inf['stopDate']}"); continue
+            r = S.get(f"{server}/data", params={"dataset": ds, "start": iso(start), "stop": iso(stop), "format": "json", "include": "header"}, timeout=60)
+            if not r.ok:
+                why.append(f"{server.split('/')[2]} {ds}: {r.status_code} {r.text[:120]!r}"); continue
+            got = r.json()
+            if got.get("data"):
+                js = got
+                print(f"[hartland] using {server.split('/')[2]} {ds}, data to {inf['stopDate']}")
                 break
-            why.append(f"{ds}: no rows"); js = None
-        else:
-            msg = r.text[:160]
-            try:
-                msg = r.json()["status"]["message"]
-                if "1405" in msg:  # ask what range this dataset actually holds
-                    inf = S.get(f"{HAPI}/info", params={"dataset": ds}, timeout=T).json()
-                    msg += f" (holds {inf.get('startDate')} to {inf.get('stopDate')})"
-            except Exception:
-                pass
-            why.append(f"{ds}: {msg}")
+            why.append(f"{server.split('/')[2]} {ds}: no rows")
+        except Exception as e:
+            why.append(f"{server.split('/')[2]} {ds}: {e}")
     if js is None:
         raise RuntimeError("; ".join(why) or "no dataset answered")
     names = [p["name"].lower() for p in js.get("parameters", [])]
