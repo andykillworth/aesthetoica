@@ -33,6 +33,7 @@ def warn(src, e):
 # The UK observatories (Hartland, Eskdalemuir, Lerwick) reach INTERMAGNET about ten days late, so the live
 # field comes from the nearest observatory that publishes within minutes. Over a few hundred kilometres the
 # disturbances that matter here (storms, substorms, the daily swing) are much the same.
+HAPI = "https://imag-data.bgs.ac.uk/GIN_V1/hapi"
 MAG_STATIONS = [("clf", "Chambon-la-Forêt"), ("val", "Valentia"), ("dou", "Dourbes"), ("had", "Hartland")]
 
 
