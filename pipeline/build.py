@@ -58,7 +58,7 @@ def events_list(day):
         pct = (m / base - 1) * 100
         li.append(f"<b>Ochre</b> cosmic-ray neutrons at Kiel, {pct:+.1f}% against the usual.")
     if day.get("kp"):
-        li.append(f"<b>Verdigris</b> the magnetic field at Hartland reached about Kp {max(v for _, v in day['kp']):.0f}.")
+        li.append(f"<b>Verdigris</b> the magnetic field at {esc(day.get('mag_station') or 'Chambon-la-Forêt')} reached about Kp {max(v for _, v in day['kp']):.0f}.")
     if day.get("wiki"):
         titles = ", ".join("‘" + esc(w["title"]) + "’" for w in day["wiki"][:3])
         li.append(f"<b>Indigo</b> {len(day['wiki'])} edits to obscure Wikipedia articles, among them {titles}.")
@@ -126,7 +126,7 @@ def about():
 <h2>Find me</h2>
 <p><a href="https://andy.fm/">andy.fm</a> &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/andy-killworth/" rel="me">LinkedIn</a></p>
 <h2>Sources</h2>
-<p class="small">Magnetic field: Hartland Observatory, British Geological Survey, via INTERMAGNET. Cosmic rays: the Kiel neutron monitor, via the NMDB database (www.nmdb.eu), founded under the European Union’s FP7 programme. Meteors: the Global Meteor Network (CC BY 4.0). Gravitational waves: public alerts from LIGO, Virgo and KAGRA via GraceDB. Grid frequency: contains BSC information that is available from Elexon at no charge and which is licensed under the Elexon Public Data Licence. Edits: Wikimedia EventStreams. Lighthouse characters: Trinity House. This is a non-commercial project.</p></div>"""
+<p class="small">Magnetic field: the observatory at Chambon-la-Forêt, France (Institut de physique du globe de Paris), via INTERMAGNET, the nearest one that publishes as it happens. Britain’s own observatories release their readings about ten days late. Cosmic rays: the Kiel neutron monitor, via the NMDB database (www.nmdb.eu), founded under the European Union’s FP7 programme. Meteors: the Global Meteor Network (CC BY 4.0). Gravitational waves: public alerts from LIGO, Virgo and KAGRA via GraceDB. Grid frequency: contains BSC information that is available from Elexon at no charge and which is licensed under the Elexon Public Data Licence. Edits: Wikimedia EventStreams. Lighthouse characters: Trinity House. This is a non-commercial project.</p></div>"""
     (SITE / "about").mkdir(exist_ok=True)
     (SITE / "about" / "index.html").write_text(f"""<!DOCTYPE html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{title}</title><meta name="description" content="{esc(desc)}">

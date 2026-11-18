@@ -161,7 +161,7 @@ body.render #sheetwrap{inset:0;filter:none}
   <p>13 November 1833. That night the great Leonid meteor storm was seen across North America.</p>
   <p>The entries are her own; the spelling has been modernised. The blots of colour are where the page touched the tray.</p>
   <p><em>Thomasin Gale, her tray and her ledgers are a fiction. Carrageen marbling size, the cliffs below Church Cliffs and the Bindon landslip of Christmas 1839 are not.</em></p>
-  <p style="margin-top:14px"><span style="font-family:'IM Fell English SC',serif">Sources.</span> Magnetic field: Hartland Observatory, British Geological Survey, via INTERMAGNET. Cosmic rays: the Kiel neutron monitor, via the NMDB database (www.nmdb.eu), founded under the European Union’s FP7 programme. Meteors: the Global Meteor Network (CC BY 4.0). Gravitational waves: public alerts from LIGO, Virgo and KAGRA via GraceDB. Grid frequency: contains BSC information that is available from Elexon at no charge and which is licensed under the Elexon Public Data Licence. Edits: Wikimedia EventStreams. Lighthouse characters: Trinity House. This is a non-commercial project.</p>
+  <p style="margin-top:14px"><span style="font-family:'IM Fell English SC',serif">Sources.</span> Magnetic field: the observatory at Chambon-la-Forêt, France (Institut de physique du globe de Paris), via INTERMAGNET, the nearest one that publishes as it happens. Britain’s own observatories release their readings about ten days late. Cosmic rays: the Kiel neutron monitor, via the NMDB database (www.nmdb.eu), founded under the European Union’s FP7 programme. Meteors: the Global Meteor Network (CC BY 4.0). Gravitational waves: public alerts from LIGO, Virgo and KAGRA via GraceDB. Grid frequency: contains BSC information that is available from Elexon at no charge and which is licensed under the Elexon Public Data Licence. Edits: Wikimedia EventStreams. Lighthouse characters: Trinity House. This is a non-commercial project.</p>
  </div>
 </div>
 </div>
@@ -174,7 +174,7 @@ body.render #sheetwrap{inset:0;filter:none}
 <i class="crop tl"></i><i class="crop tr"></i><i class="crop bl"></i><i class="crop br"></i>
 <div id="key"><div class="k k-ink">
   <span><i style="background:#c98a2c;--r:10deg"></i><b>Ochre</b> cosmic-ray neutrons, Kiel monitor</span>
-  <span><i style="background:#3f7d73;--r:-20deg"></i><b>Verdigris</b> the current, Earth’s magnetic field at Hartland</span>
+  <span><i style="background:#3f7d73;--r:-20deg"></i><b>Verdigris</b> the current, Earth’s magnetic field, measured at Chambon-la-Forêt in France</span>
   <span><i style="background:#2b3f73;--r:35deg"></i><b>Indigo</b> edits to obscure Wikipedia articles</span>
   <span><i style="background:#a32a2f;--r:-5deg"></i><b>Carmine</b> meteors over the south-west</span>
   <span><i style="background:#d6a531;--r:60deg"></i><b>Gold</b> Start Point, Portland Bill and Anvil Point lighthouses on the Dorset and Devon coast, in their real rhythms</span>
@@ -183,20 +183,21 @@ body.render #sheetwrap{inset:0;filter:none}
 </div>
 <div class="k k-cloud">
   <span><b>Long straight lines</b> cosmic-ray muons, at the rate the Kiel neutron monitor is counting</span>
-  <span><b>Curls</b> electrons, wound tighter as Earth’s magnetic field stirs at Hartland</span>
+  <span><b>Curls</b> electrons, wound tighter as Earth’s magnetic field stirs</span>
   <span><b>Short thick stubs</b> edits to obscure Wikipedia articles</span>
   <span><b>A bright trail shedding sparks</b> a meteor over the south-west</span>
   <span><b>A ripple through the vapour</b> a gravitational wave</span>
   <span><b>The lamp</b> flickers with the National Grid, and after dark Portland Bill’s four flashes come through</span>
 </div>
 <div class="k k-drum">
-  <span><b>The pens</b> magnetic force at Hartland, cosmic-ray neutrons at Kiel, the National Grid, meteors over the south-west, Wikipedia edits, gravitational waves</span>
+  <span><b>The pens</b> magnetic force at Chambon-la-Forêt, cosmic-ray neutrons at Kiel, the National Grid, meteors over the south-west, Wikipedia edits, gravitational waves</span>
   <span><b>The ticks</b> one a minute along the edge of the drum</span>
   <span><b>The window</b> brightens with Portland Bill’s beam after dark</span>
 </div>
   <span class="where">The clock and the sky are Lyme Regis’s. The instruments are wherever they happen to be.</span>
 </div>
 <script>
+const MAGN=()=>(typeof Feed!=='undefined'&&Feed.day&&Feed.day.mag_station)||'Chambon-la-Forêt';
 (()=>{
 'use strict';
 const TAU=Math.PI*2, MN=60e3, HR=3600e3, DY=86400e3, GWB=6*HR;
@@ -356,7 +357,7 @@ const PIG={cr:'#c9962e',cur:'#3f8f7f',wk:'#34508f',me:'#b8323f',lh:'#d8a62a',gw:
 const hhmm=t=>new Date(t).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'});
 function describe(m){switch(m.type){
   case 'cr':return 'a cosmic-ray neutron, counted at Kiel';
-  case 'cur':return 'a shiver in Earth’s magnetic field, at Hartland';
+  case 'cur':return 'a shiver in Earth’s magnetic field, felt at '+MAGN();
   case 'wk':return 'someone edited “'+m.title+'” on Wikipedia';
   case 'me':return (m.name&&m.name!=='Sporadic'?'a meteor of the '+m.name:'a meteor')+' over the south-west';
   case 'lh':return LIGHTS[m.i].n+' lighthouse, flashing';
@@ -476,7 +477,7 @@ function say(tr){switch(tr.type){
   case 'mu':return 'a cosmic-ray muon, at the rate Kiel is counting';
   case 'sh':return 'an air shower: one particle from space, broken into many';
   case 'e':return 'an electron, curled by Earth’s magnetic field';
-  case 'cur':return 'a shiver in Earth’s magnetic field, at Hartland';
+  case 'cur':return 'a shiver in Earth’s magnetic field, felt at '+MAGN();
   case 'wk':return 'someone edited “'+tr.title+'” on Wikipedia';
   case 'me':return meteorName(tr.name);
   case 'gw':return 'a gravitational wave'+(tr.name?', '+tr.name+',':'')+' passed through';}return '';}
@@ -563,7 +564,7 @@ let cv,ctx,W=0,H=0,RX=0,RY=0,run=false,soot,offset=0,offV=0,drag=null,cache=new 
 const mouse={x:-1,y:-1,on:false};
 const SEC_PX=1.2; // seconds of time per pixel of paper
 const CH=[
- {k:'H',label:'Magnetic force',sub:'Hartland, Devon',col:'#9fd8c4'},
+ {k:'H',label:'Magnetic force',sub:'Chambon-la-Forêt, France',col:'#9fd8c4'},
  {k:'N',label:'Neutrons',sub:'cosmic rays, Kiel',col:'#e0b060'},
  {k:'F',label:'Mains',sub:'National Grid',col:'#e8d8b0'},
  {k:'M',label:'Meteors',sub:'over the south-west',col:'#ff9f8c'},
@@ -642,7 +643,7 @@ function frame(dt){if(!run)return;if(!W)resize();if(!W)return;tn+=dt;
   // reading the paper under your candle
   if(mouse.on&&mouse.x>dx0&&mouse.x<penX&&mouse.y>dy0&&mouse.y<dy1){const r=clamp((mouse.y-dy0)/rh|0,0,rows-1);const i=Math.round(penX-mouse.x);const tt=T-i*SEC_PX*1000;const v=sample(b0-i);let a,b=hms(tt);
     const near=ticks.filter(k=>k.row===r&&Math.abs(k.i-i)<8).sort((p,q)=>Math.abs(p.i-i)-Math.abs(q.i-i))[0];
-    if(r===0)a='magnetic force at Hartland, '+sgn(v.H)+' nT from quiet';else if(r===1)a='cosmic-ray neutrons at Kiel, '+fmt(v.N)+' a minute';else if(r===2)a='the National Grid at '+v.F.toFixed(3)+' Hz';
+    if(r===0)a='magnetic force at '+MAGN()+', '+sgn(v.H)+' nT from quiet';else if(r===1)a='cosmic-ray neutrons at Kiel, '+fmt(v.N)+' a minute';else if(r===2)a='the National Grid at '+v.F.toFixed(3)+' Hz';
     else if(near){const e=near.e;a=e.type==='me'?meteorName(e.name):e.type==='wk'?'someone edited “'+e.title+'”':'a gravitational wave'+(e.name?', '+e.name:'');b=hm(e.t);}
     else a=['','','','no meteor seen at this moment','no edit at this moment','spacetime quiet'][r];
     const yb=dy0+rh*(r+.5);ctx.strokeStyle='rgba(255,230,190,.25)';ctx.beginPath();ctx.moveTo(mouse.x,dy0);ctx.lineTo(mouse.x,dy1);ctx.stroke();darkNote(ctx,W,mouse.x,yb+ys[r][Math.max(0,Math.min(cols,i))]*rh*.36,CH[r].col,a,b,.95);}}

@@ -23,7 +23,7 @@ Only the nightly job commits to `main`, so you get one deploy a day.
 |---|---|
 | `site/index.html` | The tray. Self-contained. Falls back to simulation for any missing feed. |
 | `site/sheets/<no>/` | Generated: one page per pulled sheet (`sheet.jpg`, `og.jpg`, `index.html`). |
-| `pipeline/fetch.py` | Hartland (INTERMAGNET HAPI), Kiel (NMDB NEST), Elexon frequency, GraceDB, Wikipedia, Global Meteor Network. |
+| `pipeline/fetch.py` | Nearest live magnetometer, Chambon-la-Forêt (INTERMAGNET HAPI; UK stations are ~10 days late), Kiel (NMDB NEST), Elexon frequency, GraceDB, Wikipedia, Global Meteor Network. |
 | `pipeline/ledger.py` | Writes the day's ledger line from the day's facts. |
 | `pipeline/render.mjs` | Pulls the print. Software GL, so it runs on GitHub's GPU-less runners (allow ~10–15 minutes). |
 | `pipeline/build.py` | Sheet pages with VisualArtwork JSON-LD, the archive, `sitemap.xml`, `robots.txt`, `site/data/index.json`. |
@@ -60,7 +60,7 @@ parts most likely to need a tweak once real responses come back:
 
 ## Credits and licences
 
-- Hartland Observatory, British Geological Survey, via INTERMAGNET (CC BY-NC 4.0).
+- Chambon-la-Forêt observatory, Institut de physique du globe de Paris, via INTERMAGNET (CC BY-NC 4.0).
 - NMDB (www.nmdb.eu) and the Kiel neutron monitor. Free for non-commercial use; acknowledge NMDB and the station.
 - Elexon: "Contains BSC information that is available from Elexon at no charge and which is licensed under the Elexon Public Data Licence."
 - Global Meteor Network (CC BY 4.0). LIGO, Virgo and KAGRA public alerts via GraceDB. Wikimedia recent changes.

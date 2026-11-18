@@ -29,45 +29,41 @@ def warn(src, e):
     print(f"[{src}] skipped: {e}", file=sys.stderr)
 
 
-# ---------------------------------------------------------------- Hartland
-HAPI = "https://imag-data.bgs.ac.uk/GIN_V1/hapi"
+# ---------------------------------------------------------------- magnetometer
+# The UK observatories (Hartland, Eskdalemuir, Lerwick) reach INTERMAGNET about ten days late, so the live
+# field comes from the nearest observatory that publishes within minutes. Over a few hundred kilometres the
+# disturbances that matter here (storms, substorms, the daily swing) are much the same.
+MAG_STATIONS = [("clf", "Chambon-la-Forêt"), ("val", "Valentia"), ("dou", "Dourbes"), ("had", "Hartland")]
 
 
-def hartland(start, end):
-    """Hartland (HAD) one-minute data from the INTERMAGNET HAPI server.
-    Returns 10-minute H deviations (nT) and a rough Kp-like activity estimate."""
-    # BGS's own HAPI server carries Hartland in near real time; INTERMAGNET's copy runs about ten days behind
-    tries = [("https://wdcapi.bgs.ac.uk/hapi", ds) for ds in ("had/PT1M/xyz", "had/PT1M/hdz", "had/PT1M/original")]
-    try:
-        cat = S.get(f"{HAPI}/catalog", timeout=T).json()["catalog"]
-        ids = [c["id"] for c in cat if c["id"].lower().startswith("had/") and "PT1M" in c["id"]]
-        ids.sort(key=lambda i: (0 if "best-avail" in i else 1 if "adjusted" in i else 2, 0 if "xyz" in i.lower() else 1))
-        tries += [(HAPI, ds) for ds in ids[:3]]
-    except Exception as e:
-        print(f"[hartland] INTERMAGNET catalogue unavailable: {e}")
-    js, why = None, []
-    for server, ds in tries:
-        try:
-            inf = S.get(f"{server}/info", params={"dataset": ds}, timeout=T).json()
-            if inf.get("status", {}).get("code", 1200) != 1200:
-                why.append(f"{server.split('/')[2]} {ds}: {inf['status'].get('message')}"); continue
-            held = datetime.fromisoformat(inf["stopDate"].replace("Z", "+00:00"))
-            stop = min(end, held, datetime.now(timezone.utc).replace(second=0, microsecond=0))
-            if stop <= start:
-                why.append(f"{server.split('/')[2]} {ds}: holds data only to {inf['stopDate']}"); continue
-            r = S.get(f"{server}/data", params={"dataset": ds, "start": iso(start), "stop": iso(stop), "format": "json", "include": "header"}, timeout=60)
-            if not r.ok:
-                why.append(f"{server.split('/')[2]} {ds}: {r.status_code} {r.text[:120]!r}"); continue
-            got = r.json()
-            if got.get("data"):
-                js = got
-                print(f"[hartland] using {server.split('/')[2]} {ds}, data to {inf['stopDate']}")
-                break
-            why.append(f"{server.split('/')[2]} {ds}: no rows")
-        except Exception as e:
-            why.append(f"{server.split('/')[2]} {ds}: {e}")
+def magnetometer(start, end, prefer=None):
+    """One-minute data from the nearest live INTERMAGNET observatory.
+    Returns 10-minute H deviations (nT), a rough Kp-like activity estimate, and the station's name."""
+    order = sorted(MAG_STATIONS, key=lambda s: 0 if s[1] == prefer else 1)
+    cat = S.get(f"{HAPI}/catalog", timeout=T).json()["catalog"]
+    js, why, name = None, [], None
+    for code, nm in order:
+        ids = [c["id"] for c in cat if c["id"].lower().startswith(code + "/best-avail/pt1m")]
+        ids.sort(key=lambda i: 0 if "xyz" in i.lower() else 1)
+        for ds in ids[:2]:
+            try:
+                inf = S.get(f"{HAPI}/info", params={"dataset": ds}, timeout=T).json()
+                held = datetime.fromisoformat(inf["stopDate"].replace("Z", "+00:00"))
+                stop = min(end, held)
+                if stop <= start or end - held > timedelta(hours=3):
+                    why.append(f"{ds}: holds data only to {inf['stopDate']}"); break
+                r = S.get(f"{HAPI}/data", params={"dataset": ds, "start": iso(start), "stop": iso(stop), "format": "json", "include": "header"}, timeout=60)
+                if r.ok and r.json().get("data"):
+                    js, name = r.json(), nm
+                    print(f"[magnetometer] {nm} ({ds}), data to {inf['stopDate']}")
+                    break
+                why.append(f"{ds}: {r.status_code}")
+            except Exception as e:
+                why.append(f"{ds}: {e}")
+        if js:
+            break
     if js is None:
-        raise RuntimeError("; ".join(why) or "no dataset answered")
+        raise RuntimeError("; ".join(why) or "no observatory answered")
     names = [p["name"].lower() for p in js.get("parameters", [])]
     rows = js["data"]
     hs = []
@@ -104,7 +100,7 @@ def hartland(start, end):
         rng = max(three[k]) - min(three[k])
         est = min(9, max(0, round(math.log(max(rng, 1) / 5, 1.6), 1)))
         kp.append([ms(k), est])
-    return out, kp
+    return out, kp, name
 
 
 # ---------------------------------------------------------------- NMDB (Kiel)
@@ -260,7 +256,7 @@ def run(d: date, final: bool):
     upto = min(end, now)
     day = load_day(d)
     jobs = [
-        ("hartland", lambda: hartland(start, upto)),
+        ("magnetometer", lambda: magnetometer(start, upto, day.get("mag_station"))),
         ("nmdb", lambda: nmdb(start, upto)),
         ("elexon", lambda: elexon(start, upto)),
         ("gracedb", lambda: gracedb(start, upto)),
@@ -271,8 +267,11 @@ def run(d: date, final: bool):
     for name, job in jobs:
         try:
             res = job()
-            if name == "hartland":
+            if name == "magnetometer":
+                if day.get("mag_station") and day["mag_station"] != res[2]:
+                    day["magH"], day["kp"] = [], []  # don't stitch two observatories into one trace
                 day["magH"], day["kp"] = merge_series(day.get("magH"), res[0]), merge_series(day.get("kp"), res[1])
+                day["mag_station"] = res[2]
             elif name == "nmdb":
                 day["neutron"] = merge_series(day.get("neutron"), res)
                 base = neutron_baseline(d)
