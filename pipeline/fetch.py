@@ -53,7 +53,15 @@ def hartland(start, end):
                 break
             why.append(f"{ds}: no rows"); js = None
         else:
-            why.append(f"{ds}: {r.status_code} {r.text[:160]!r}")
+            msg = r.text[:160]
+            try:
+                msg = r.json()["status"]["message"]
+                if "1405" in msg:  # ask what range this dataset actually holds
+                    inf = S.get(f"{HAPI}/info", params={"dataset": ds}, timeout=T).json()
+                    msg += f" (holds {inf.get('startDate')} to {inf.get('stopDate')})"
+            except Exception:
+                pass
+            why.append(f"{ds}: {msg}")
     if js is None:
         raise RuntimeError("; ".join(why) or "no dataset answered")
     names = [p["name"].lower() for p in js.get("parameters", [])]
