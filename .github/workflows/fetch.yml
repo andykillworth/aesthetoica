@@ -1,5 +1,5 @@
 # Every 15 minutes: pull today's events into the `data` branch.
-# GitHub's scheduler can lag; cron-job.org can also trigger this via workflow_dispatch.
+# cron-job.org triggers this every 15 minutes; GitHub's own schedule stays as a backup (duplicates are harmless).
 name: fetch
 on:
   schedule: [{cron: "*/15 * * * *"}]
