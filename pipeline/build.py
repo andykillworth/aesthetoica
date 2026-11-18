@@ -5,6 +5,7 @@
 Reads day files from DATA_DIR/days, writes into site/.
 """
 import html
+import shutil
 import json
 import statistics
 from datetime import date, datetime
@@ -12,6 +13,19 @@ from datetime import date, datetime
 from common import DAYS, LONDON, SITE, sheet_no
 
 BASE_URL = "https://aesthetoica.com"
+PERSON = {"@type": "Person", "@id": "https://andy.fm/#andy", "name": "Andy Killworth", "url": "https://andy.fm/",
+          "sameAs": ["https://www.linkedin.com/in/andy-killworth/", "https://andy.fm/"]}
+ICONS = ('<link rel="icon" href="/favicon.ico" sizes="any"><link rel="icon" href="/favicon.svg" type="image/svg+xml">'
+         '<link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><meta name="theme-color" content="#1f1b18">')
+
+
+def social(url, title, desc, image, kind="website", alt="A marbled sheet"):
+    """canonical, Open Graph and Twitter tags for one page"""
+    return (f'<link rel="canonical" href="{url}">'
+            f'<meta property="og:type" content="{kind}"><meta property="og:site_name" content="æsthetoica"><meta property="og:locale" content="en_GB">'
+            f'<meta property="og:url" content="{url}"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(desc)}">'
+            f'<meta property="og:image" content="{image}"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="{esc(alt)}">'
+            f'<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(desc)}"><meta name="twitter:image" content="{image}">')
 FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=IM+Fell+Double+Pica&family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">'
 CSS = """*{box-sizing:border-box;margin:0;padding:0}body{background:#1f1b18;color:#d8cdb8;font-family:'IM Fell English',Georgia,serif;min-height:100vh}
 a{color:inherit;text-underline-offset:3px}.top{display:flex;justify-content:space-between;align-items:flex-end;padding:22px 5vw 18px}
@@ -71,18 +85,55 @@ def page(d, day, prev_d, next_d):
     img = f"/sheets/{n}/sheet.jpg"
     ld = {"@context": "https://schema.org", "@type": "VisualArtwork", "name": f"Sheet No. {n:,}", "dateCreated": d.isoformat(),
           "image": BASE_URL + img, "artMedium": "Simulated marbling driven by live data", "artform": "Generative print",
-          "locationCreated": {"@type": "Place", "name": "Lyme Regis, Dorset"}, "isPartOf": {"@type": "Collection", "name": "æsthetoica sheets", "url": BASE_URL + "/sheets/"}}
+          "locationCreated": {"@type": "Place", "name": "Lyme Regis, Dorset"}, "isPartOf": {"@type": "Collection", "name": "æsthetoica sheets", "url": BASE_URL + "/sheets/"},
+          "url": f"{BASE_URL}/sheets/{n}/", "creator": {"@id": PERSON["@id"]}, "description": desc}
+    ld = {"@context": "https://schema.org", "@graph": [{k: v for k, v in ld.items() if k != "@context"}, PERSON]}
     pn = (f'<a href="/sheets/{sheet_no(prev_d)}/">Sheet No. {sheet_no(prev_d):,}</a>' if prev_d else "<span></span>") + \
          (f'<a href="/sheets/{sheet_no(next_d)}/">Sheet No. {sheet_no(next_d):,}</a>' if next_d else "<span></span>")
     return f"""<!DOCTYPE html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{esc(title)}</title><meta name="description" content="{esc(desc)}"><link rel="canonical" href="{BASE_URL}/sheets/{n}/">
-<meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(desc)}"><meta property="og:image" content="{BASE_URL}/sheets/{n}/og.jpg"><meta name="twitter:card" content="summary_large_image">
+<title>{esc(title)}</title><meta name="description" content="{esc(desc)}">
+{social(f"{BASE_URL}/sheets/{n}/", title, desc, f"{BASE_URL}/sheets/{n}/og.jpg", "article", f"Marbled sheet No. {n:,}, {nice(d)}")}
+{ICONS}
 {FONTS}<style>{CSS}</style><script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script></head><body>
-<div class="top"><a class="wm" href="/">æsthetoica</a><div class="nav"><a href="/#day-{d.isoformat()}">Open this sheet in the tray</a><a href="/sheets/">All sheets</a><a href="/#on-the-word">On the word</a></div></div>
+<div class="top"><a class="wm" href="/">æsthetoica</a><div class="nav"><a href="/#day-{d.isoformat()}">Open this sheet in the tray</a><a href="/sheets/">All sheets</a><a href="/about/">About</a></div></div>
 <div class="leaf"><div class="sheet"><img src="{img}" alt="Marbled sheet No. {n:,}, {nice(d)}" width="1800" height="1200">
 <div class="plate"><div class="t">æsthetoica</div><div class="n">Sheet No. {n:,}</div><div class="d">{nice(d)}</div><div class="d">Lyme Regis</div><div class="d">Pulled at midnight</div></div></div>
 <div class="note">{f'<div class="ledger">{esc(led)}</div>' if led else ''}<h2>What fell into the tray</h2><ul>{events_list(day)}</ul></div>
 <div class="pn">{pn}</div></div></body></html>"""
+
+
+ABOUT_UPDATED = "2026-11-18"
+ABOUT_CSS = """.about{max-width:760px;margin:10px auto 70px;padding:38px 46px 42px;background:#f1e9d6;color:#2f241b;box-shadow:0 6px 14px rgba(0,0,0,.55)}
+.about h1{font-family:'IM Fell Double Pica',serif;font-weight:400;font-size:40px;color:#2c2118;margin-bottom:14px}.about p{font-size:19px;line-height:1.55;margin:0 0 14px}
+.about h2{font-family:'IM Fell English SC',serif;font-weight:400;font-size:18px;color:#5a4634;margin:26px 0 8px}.about a{color:#6b2a1f}.about .small{font-size:16px;color:#4d3d2e}
+@media(max-width:640px){.about{padding:26px 22px 30px;margin:6px 4vw 50px}.about h1{font-size:32px}.about p{font-size:17.5px}}"""
+
+
+def about():
+    url = BASE_URL + "/about/"
+    title = "About · æsthetoica"
+    desc = "æsthetoica is a small art project by Andy Killworth, who lives a few miles from Lyme Regis in west Dorset."
+    ld = {"@context": "https://schema.org", "@graph": [
+        {"@type": "AboutPage", "@id": url, "url": url, "name": title, "description": desc, "inLanguage": "en-GB",
+         "isPartOf": {"@id": BASE_URL + "/#website"}, "mainEntity": {"@id": PERSON["@id"]}, "dateModified": ABOUT_UPDATED},
+        PERSON]}
+    body = f"""<div class="about"><h1>About</h1>
+<p>æsthetoica is a small art project by <a href="https://andy.fm/">Andy Killworth</a>. I live a few miles from Lyme Regis in west Dorset.</p>
+<p>Every day the site marbles a sheet of paper using things that pass through Lyme Regis without anyone noticing: cosmic rays, small shifts in the Earth’s magnetic field, meteors overhead, gravitational waves from colliding black holes, the hum of the National Grid and edits to obscure Wikipedia articles. The feeds are real and arrive as they happen. At midnight the day’s sheet is pulled, given a number and added to <a href="/sheets/">the archive</a>.</p>
+<p>The same data can also be seen as a cloud chamber or as pens on a smoked drum. Use the switcher at the top of <a href="/">the tray</a>.</p>
+<h2>What is true and what is not</h2>
+<p>Thomasin Gale, the bookbinder of Broad Street, is made up, and so is the history of the word. Her nightly ledger line is written by a language model from that day’s readings. The readings are real.</p>
+<h2>Find me</h2>
+<p><a href="https://andy.fm/">andy.fm</a> &nbsp;·&nbsp; <a href="https://www.linkedin.com/in/andy-killworth/" rel="me">LinkedIn</a></p>
+<h2>Sources</h2>
+<p class="small">Magnetic field: Hartland Observatory, British Geological Survey, via INTERMAGNET. Cosmic rays: the Kiel neutron monitor, via the NMDB database (www.nmdb.eu), founded under the European Union’s FP7 programme. Meteors: the Global Meteor Network (CC BY 4.0). Gravitational waves: public alerts from LIGO, Virgo and KAGRA via GraceDB. Grid frequency: contains BSC information that is available from Elexon at no charge and which is licensed under the Elexon Public Data Licence. Edits: Wikimedia EventStreams. Lighthouse characters: Trinity House. This is a non-commercial project.</p></div>"""
+    (SITE / "about").mkdir(exist_ok=True)
+    (SITE / "about" / "index.html").write_text(f"""<!DOCTYPE html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{title}</title><meta name="description" content="{esc(desc)}">
+{social(url, title, desc, BASE_URL + "/og.jpg")}
+{ICONS}{FONTS}<style>{CSS}{ABOUT_CSS}</style><script type="application/ld+json">{json.dumps(ld, ensure_ascii=False)}</script></head><body>
+<div class="top"><a class="wm" href="/">æsthetoica</a><div class="nav"><a href="/">Today’s tray</a><a href="/sheets/">Sheets</a><a href="/#on-the-word">On the word</a></div></div>
+{body}</body></html>""")
 
 
 def main():
@@ -107,12 +158,25 @@ def main():
     cards = "\n".join(f'<a class="card" href="{s["url"]}"><img src="{s["img"]}" alt="Sheet No. {s["sheet"]:,}" loading="lazy"><div class="no">Sheet No. {s["sheet"]:,}</div>'
                       f'<div class="dd">{nice(date.fromisoformat(s["date"]))}</div><div class="ln">{esc(s["ledger"])}</div></a>' for s in sheets)
     (SITE / "sheets").mkdir(exist_ok=True)
+    ARCH_DESC = "Every marbled sheet pulled from the tray, one a day, numbered on from Thomasin Gale's first in 1823."
+    arch_ld = {"@context": "https://schema.org", "@graph": [
+        {"@type": "CollectionPage", "@id": BASE_URL + "/sheets/", "url": BASE_URL + "/sheets/", "name": "Sheets", "description": ARCH_DESC,
+         "isPartOf": {"@id": BASE_URL + "/#website"}, "creator": {"@id": PERSON["@id"]},
+         "hasPart": [{"@type": "VisualArtwork", "name": f"Sheet No. {x['sheet']:,}", "url": BASE_URL + x["url"], "dateCreated": x["date"]} for x in sheets[:50]]},
+        PERSON]}
     (SITE / "sheets" / "index.html").write_text(f"""<!DOCTYPE html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Sheets · æsthetoica</title><meta name="description" content="Every marbled sheet pulled from the tray, one a day, numbered on from Thomasin Gale's first in 1823."><link rel="canonical" href="{BASE_URL}/sheets/">
-{FONTS}<style>{CSS}</style></head><body><div class="top"><a class="wm" href="/">æsthetoica</a><div class="nav"><a href="/">Today’s tray</a><a href="/#on-the-word">On the word</a></div></div>
+<title>Sheets · æsthetoica</title><meta name="description" content="{esc(ARCH_DESC)}">
+{social(BASE_URL + "/sheets/", "Sheets · æsthetoica", ARCH_DESC, BASE_URL + (sheets[0]["url"] + "og.jpg" if sheets else "/og.jpg"))}
+{ICONS}{FONTS}<style>{CSS}</style><script type="application/ld+json">{json.dumps(arch_ld, ensure_ascii=False)}</script></head><body><div class="top"><a class="wm" href="/">æsthetoica</a><div class="nav"><a href="/">Today’s tray</a><a href="/#on-the-word">On the word</a><a href="/about/">About</a></div></div>
 <h1 class="ar">Sheets</h1><div class="sub">Pulled at midnight, one a day. Numbered on from Thomasin Gale’s first, 3 December 1823.</div><div class="grid">{cards}</div></body></html>""")
-    urls = [f"{BASE_URL}/", f"{BASE_URL}/sheets/"] + [BASE_URL + s["url"] for s in sheets]
-    (SITE / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(f"<url><loc>{u}</loc></url>" for u in urls) + "\n</urlset>\n")
+    about()
+    # the home page shares the newest sheet
+    if sheets and (SITE / sheets[0]["url"].strip("/") / "og.jpg").exists():
+        shutil.copyfile(SITE / sheets[0]["url"].strip("/") / "og.jpg", SITE / "og.jpg")
+    newest = sheets[0]["date"] if sheets else date.today().isoformat()
+    urls = [(f"{BASE_URL}/", newest), (f"{BASE_URL}/sheets/", newest), (f"{BASE_URL}/about/", ABOUT_UPDATED)] + [(BASE_URL + x["url"], x["date"]) for x in sheets]
+    (SITE / "sitemap.xml").write_text('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+                                      + "\n".join(f"<url><loc>{u}</loc><lastmod>{m}</lastmod></url>" for u, m in urls) + "\n</urlset>\n")
     (SITE / "robots.txt").write_text(f"User-agent: *\nAllow: /\nSitemap: {BASE_URL}/sitemap.xml\n")
     print(f"built {len(sheets)} sheet pages")
 
