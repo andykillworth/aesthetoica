@@ -687,7 +687,7 @@ function frame(now){const dt=Math.min(.05,(now-lastF)/1000);lastF=now;if(!Tray.r
   if(App.mode!=='loading'&&VIEW==='ink')Tray.draw(dt);
   if(VIEWS[VIEW].mod)VIEWS[VIEW].mod.frame(dt);
   if(VIEW!=='ink'&&!introGone&&now-introT>9000)dropIntro();
-  if(RENDER&&App.mode==='done'){window.__sheetDone=true;return;}
+  if(RENDER&&App.mode==='done'){window.__drawSheet=()=>Tray.draw(0);window.__sheetDone=true;return;}
   requestAnimationFrame(frame);}
 
 setInterval(()=>{if(App.mode==='live')Feed.load(App.date,true);},10*60e3);

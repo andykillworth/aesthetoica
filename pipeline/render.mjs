@@ -5,7 +5,7 @@
 // finish replaying, and saves site/sheets/<no>/sheet.jpg and og.jpg.
 import {chromium} from 'playwright';
 import http from 'node:http';
-import {readFile, mkdir} from 'node:fs/promises';
+import {readFile, mkdir, writeFile} from 'node:fs/promises';
 import {existsSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -35,8 +35,20 @@ console.log(`rendering sheet ${sheetNo} for ${date} (this takes a few minutes on
 await page.waitForFunction(() => window.__sheetDone === true, null, {timeout: 40 * 60 * 1000, polling: 2000});
 const out = path.join(SITE, 'sheets', String(sheetNo));
 await mkdir(out, {recursive: true});
-const cv = page.locator('#cgl');
-await cv.screenshot({path: path.join(out, 'sheet.jpg'), type: 'jpeg', quality: 88});
-await page.screenshot({path: path.join(out, 'og.jpg'), type: 'jpeg', quality: 85, clip: {x: 300, y: 285, width: 1200, height: 630}});
+// Take the pictures from inside the page: draw the finished sheet once more and copy the canvas in the
+// same task (a WebGL canvas is only readable straight after drawing). This avoids Playwright's
+// "wait until the element is stable" check, which never settles on GitHub's software-GL runners.
+const shots = await page.evaluate(() => {
+  window.__drawSheet();
+  const c = document.getElementById('cgl');
+  const sheet = c.toDataURL('image/jpeg', 0.88);
+  const o = document.createElement('canvas'); o.width = 1200; o.height = 630;
+  const g = o.getContext('2d'); const k = Math.max(1200 / c.width, 630 / c.height);
+  g.drawImage(c, (1200 - c.width * k) / 2, (630 - c.height * k) / 2, c.width * k, c.height * k);
+  return {sheet, og: o.toDataURL('image/jpeg', 0.85)};
+});
+const save = (name, url) => writeFile(path.join(out, name), Buffer.from(url.split(',')[1], 'base64'));
+await save('sheet.jpg', shots.sheet);
+await save('og.jpg', shots.og);
 console.log('saved', out);
 await browser.close(); server.close();
