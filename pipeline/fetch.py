@@ -40,10 +40,22 @@ def hartland(start, end):
     ids = [c["id"] for c in cat if c["id"].lower().startswith("had/") and "PT1M" in c["id"]]
     if not ids:
         raise RuntimeError("no HAD PT1M dataset in catalog")
-    ds = sorted(ids, key=lambda i: (0 if "best-avail" in i else 1 if "reported" in i else 2))[0]
-    r = S.get(f"{HAPI}/data", params={"dataset": ds, "start": iso(start), "stop": iso(end), "format": "json"}, timeout=60)
-    r.raise_for_status()
-    js = r.json()
+    # try each HAD minute dataset in turn; the server refuses some combinations, and says why
+    order = sorted(ids, key=lambda i: (0 if "best-avail" in i else 1 if "reported" in i else 2, 0 if "xyz" in i.lower() else 1 if "native" in i.lower() else 2))
+    js, why = None, []
+    for ds in order:
+        stop = min(end, datetime.now(timezone.utc).replace(second=0, microsecond=0))
+        r = S.get(f"{HAPI}/data", params={"dataset": ds, "start": iso(start), "stop": iso(stop), "format": "json", "include": "header"}, timeout=60)
+        if r.ok:
+            js = r.json()
+            if js.get("data"):
+                print(f"[hartland] using {ds}")
+                break
+            why.append(f"{ds}: no rows"); js = None
+        else:
+            why.append(f"{ds}: {r.status_code} {r.text[:160]!r}")
+    if js is None:
+        raise RuntimeError("; ".join(why) or "no dataset answered")
     names = [p["name"].lower() for p in js.get("parameters", [])]
     rows = js["data"]
     hs = []

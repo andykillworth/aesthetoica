@@ -71,9 +71,16 @@ def write(d: date, force=False):
     msg = f"Sheet No. {sheet_no(d)}, {d.strftime('%-d %B %Y')}. Facts about the tray today:\n{json.dumps(facts(day), indent=1)}\n\nWrite tonight's entry."
     r = requests.post("https://api.anthropic.com/v1/messages", timeout=60,
                       headers={"x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json"},
-                      json={"model": MODEL, "max_tokens": 120, "system": SYSTEM, "messages": [{"role": "user", "content": msg}]})
-    r.raise_for_status()
-    line = "".join(b.get("text", "") for b in r.json()["content"]).strip().strip('"')
+                      json={"model": MODEL, "max_tokens": 1024, "system": SYSTEM, "messages": [{"role": "user", "content": msg}]})
+    if not r.ok:
+        print(f"ledger: the API refused ({r.status_code}): {r.text[:300]}")
+        return
+    js = r.json()
+    line = "".join(b.get("text", "") for b in js.get("content", []) if b.get("type") == "text").strip().strip('"')
+    if not line:
+        # never save a blank entry; say what came back so it can be fixed
+        print("ledger: no text came back:", json.dumps(js)[:400])
+        return
     line = line.replace("—", ",").replace("–", ",")
     day["ledger"] = line
     save_day(d, day)
