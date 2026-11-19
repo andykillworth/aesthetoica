@@ -5,6 +5,7 @@
 Reads day files from DATA_DIR/days, writes into site/.
 """
 import html
+import re
 import shutil
 import json
 import statistics
@@ -64,7 +65,7 @@ def events_list(day):
         li.append(f"<b>Indigo</b> {len(day['wiki'])} edits to obscure Wikipedia articles, among them {titles}.")
     mets = day.get("meteors") or []
     if mets:
-        sh = sorted({m.get("shower") for m in mets if m.get("shower") and m["shower"] != "Sporadic"})
+        sh = sorted({m.get("shower") for m in mets if m.get("shower") and m["shower"] not in ("Sporadic", "Minor shower") and not re.fullmatch(r"[A-Z]{3}", m["shower"])})
         bright = sum(1 for m in mets if m.get("mag") is not None and m["mag"] < -2)
         li.append(f"<b>Carmine</b> {len(mets)} meteors within 400 km of Lyme Regis, {bright} of them bright{(', ' + ', '.join(sh) + ' among them') if sh else ''}.")
     for g in day.get("gw") or []:

@@ -39,6 +39,9 @@ Combed. No one here.
 """
 
 
+SHOWERS = {"Quadrantid", "Lyrid", "Eta Aquariid", "Perseid", "Draconid", "Orionid", "Leonid", "Geminid", "Ursid", "Southern Taurid", "Northern Taurid"}
+
+
 def facts(day):
     f = {}
     if day.get("neutron"):
@@ -59,7 +62,7 @@ def facts(day):
     bright = [m for m in mets if m.get("mag") is not None and m["mag"] < -2]
     hours = sorted({datetime.fromtimestamp(m["t"] / 1000, LONDON).hour for m in bright})
     f["red_lines"] = {"count": len(bright), "hours": hours, "faint_specks": len(mets) - len(bright),
-                      "showers": sorted({m.get("shower") for m in mets if m.get("shower") and m["shower"] != "Sporadic"})}
+                      "showers": sorted({m.get("shower") for m in mets if m.get("shower") and m["shower"] in SHOWERS})}
     f["blue_drops"] = len(day.get("wiki") or [])
     f["combed"] = len(day.get("gw") or [])
     return f

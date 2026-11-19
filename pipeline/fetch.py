@@ -248,7 +248,7 @@ def gmn(d, start, end, radius_km=400):
                 out.append({"t": ms(t), "lat": lat, "lon": lon, "h1": float(f[iH1]), "h2": float(f[iH2]),
                             "mag": float(f[iMag]) if iMag is not None else None,
                             "v": float(f[iV]) if iV is not None else None,
-                            "shower": SHOWER_NAMES.get(sh, "Sporadic" if sh in ("", "...") else sh)})
+                            "shower": SHOWER_NAMES.get(sh, "Sporadic" if sh in ("", "...", "-1") else "Minor shower"), "code": sh})
             except (ValueError, IndexError, TypeError):
                 continue
     return out, complete

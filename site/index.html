@@ -359,7 +359,7 @@ function describe(m){switch(m.type){
   case 'cr':return 'a cosmic-ray neutron, counted at Kiel';
   case 'cur':return 'a shiver in Earth’s magnetic field, felt at '+MAGN();
   case 'wk':return 'someone edited “'+m.title+'” on Wikipedia';
-  case 'me':return (m.name&&m.name!=='Sporadic'?'a meteor of the '+m.name:'a meteor')+' over the south-west';
+  case 'me':return meteorName(m.name);
   case 'lh':return LIGHTS[m.i].n+' lighthouse, flashing';
   case 'ground':return 'the first drops, laid down at midnight';}
   return '';}
@@ -460,7 +460,7 @@ const Sound=(()=>{let AC=null,on=false,bus,hum,humG,water;
 const hm=t=>new Date(t).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit'});
 const hms=t=>new Date(t).toLocaleTimeString('en-GB',{timeZone:'Europe/London',hour:'2-digit',minute:'2-digit',second:'2-digit'});
 function lhPortland(ts){const ph=((ts%20)+20)%20;let v=0;for(let i=0;i<4;i++){const d=ph-i*2.2;v+=Math.exp(-d*d/.02);}return Math.min(1,v);}
-const meteorName=n=>(n&&n!=='Sporadic'?'a meteor of the '+n.replace(/s$/,'')+'s':'a meteor')+' over the south-west';
+const meteorName=n=>(n&&n!=='Sporadic'&&n!=='Minor shower'&&!/^[A-Z]{3}$/.test(n)?'a meteor of the '+n.replace(/s$/,'')+'s':n==='Minor shower'||/^[A-Z]{3}$/.test(n||'')?'a meteor from a minor shower':'a meteor')+' over the south-west';
 /* a note on a dark ground: dot, text, time */
 function darkNote(ctx,W,x,y,col,a,b,al){if(al<=0)return;ctx.save();ctx.globalAlpha=al;ctx.globalCompositeOperation='source-over';
   ctx.fillStyle=col;ctx.beginPath();ctx.arc(x,y,3,0,TAU);ctx.fill();ctx.strokeStyle='rgba(236,227,211,.45)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(x,y,7,0,TAU);ctx.stroke();
