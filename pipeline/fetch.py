@@ -7,6 +7,7 @@ Every source is optional: if one fails the others still write, and the
 site falls back to simulation for anything missing.
 """
 import argparse
+import os
 import csv
 import io
 import math
@@ -206,19 +207,26 @@ def haversine(a, b):
 
 
 def gmn(d, start, end, radius_km=400):
-    """Meteors from GMN daily trajectory summaries that ended within radius_km of Lyme Regis."""
+    """Meteors from GMN daily trajectory summaries that ended within radius_km of Lyme Regis.
+    GMN files run noon to noon (UTC) and are named for the afternoon they start, so a London day needs the
+    files for the day before and the day itself. They appear about 30 hours after the night ends.
+    Returns (meteors, complete): complete is False until both files are published."""
     idx = S.get(GMN_DAILY, timeout=T).text
-    names = set(re.findall(r'href="(traj_summary_[^"]+\.txt)"', idx))
-    want = [n for n in names if d.strftime("%Y%m%d") in n or (d + timedelta(days=1)).strftime("%Y%m%d") in n]
+    names = set(re.findall(r'href="(traj_summary_\d{8}_[^"]+\.txt)"', idx))
+    days = [(d - timedelta(days=1)).strftime("%Y%m%d"), d.strftime("%Y%m%d")]
+    want = [n for n in names if n[13:21] in days]
+    complete = all(any(n[13:21] == k for n in want) for k in days)
     out = []
     for n in want:
         txt = S.get(GMN_DAILY + n, timeout=120).text
         lines = txt.splitlines()
-        hdr = next((l for l in lines if l.startswith("#") and "Unique" in l and "identifier" in l), None)
+        # the column names are split over two header lines: names, then units
+        hl = [l for l in lines[:12] if l.startswith("#") and ";" in l]
         rows = [l for l in lines if l and not l.startswith("#")]
-        if not hdr or not rows:
+        if len(hl) < 2 or not rows:
             continue
-        cols = [c.strip().lower() for c in hdr.lstrip("#").split(";")]
+        a, b = ([c.strip() for c in l.lstrip("#").split(";")] for l in hl[:2])
+        cols = [f"{x} {y}".strip().lower() for x, y in zip(a, b)]
 
         def col(*keys):
             for i, c in enumerate(cols):
@@ -243,7 +251,7 @@ def gmn(d, start, end, radius_km=400):
                             "shower": SHOWER_NAMES.get(sh, "Sporadic" if sh in ("", "...") else sh)})
             except (ValueError, IndexError, TypeError):
                 continue
-    return out
+    return out, complete
 
 
 SHOWER_NAMES = {"QUA": "Quadrantid", "LYR": "Lyrid", "ETA": "Eta Aquariid", "PER": "Perseid", "DRA": "Draconid",
@@ -251,6 +259,31 @@ SHOWER_NAMES = {"QUA": "Quadrantid", "LYR": "Lyrid", "ETA": "Eta Aquariid", "PER
 
 
 # ---------------------------------------------------------------- main
+def backfill(n):
+    """Meteors arrive ~30 hours late: fill them in for recent sheets, so those sheets can be pulled again."""
+    changed = []
+    for k in range(1, n + 1):
+        d = london_today() - timedelta(days=k)
+        day = load_day(d)
+        if not day.get("final") or day.get("meteors_final"):
+            continue
+        start, end = day_bounds(d)
+        try:
+            mets, complete = gmn(d, start, end)
+        except Exception as e:
+            warn("gmn", e); continue
+        if not complete:
+            print(f"[gmn] {d}: still waiting for GMN"); continue
+        day["meteors"], day["meteors_final"] = merge_events([], mets), True
+        save_day(d, day)
+        changed.append(d.isoformat())
+        print(f"[gmn] {d}: {len(mets)} meteors added")
+    if os.environ.get("RERENDER_FILE"):
+        with open(os.environ["RERENDER_FILE"], "w") as f:
+            f.write(" ".join(changed))
+
+
+
 def run(d: date, final: bool):
     start, end = day_bounds(d)
     now = datetime.now(timezone.utc)
@@ -285,7 +318,9 @@ def run(d: date, final: bool):
             elif name == "wikipedia":
                 day["wiki"] = merge_events(day.get("wiki"), res)
             elif name == "gmn":
-                day["meteors"] = merge_events([], res)
+                day["meteors"], day["meteors_final"] = merge_events([], res[0]), res[1]
+                if not res[1]:
+                    print("[gmn] the night's meteors aren't published yet; they'll be added in a later pull")
             print(f"[{name}] ok")
         except Exception as e:  # keep going: missing sources fall back to simulation on the site
             warn(name, e)
@@ -299,5 +334,9 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--date", help="YYYY-MM-DD (London). Default: today")
     ap.add_argument("--final", action="store_true", help="finished day: also pull meteors from the Global Meteor Network")
+    ap.add_argument("--backfill", type=int, metavar="N", help="add meteors to the last N finished days that are still waiting for them; list the days changed in $RERENDER_FILE")
     a = ap.parse_args()
-    run(date.fromisoformat(a.date) if a.date else london_today(), a.final)
+    if a.backfill:
+        backfill(a.backfill)
+    else:
+        run(date.fromisoformat(a.date) if a.date else london_today(), a.final)

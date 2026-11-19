@@ -50,6 +50,11 @@ def facts(day):
     if day.get("hz"):
         hz = [v for _, v in day["hz"]]
         f["rocking"] = {"lowest_hz": min(hz), "highest_hz": max(hz)}
+    if not day.get("meteors_final"):
+        f["red_lines"] = "not yet known: do not mention red lines or meteors at all"
+        f["blue_drops"] = len(day.get("wiki") or [])
+        f["combed"] = len(day.get("gw") or [])
+        return f
     mets = day.get("meteors") or []
     bright = [m for m in mets if m.get("mag") is not None and m["mag"] < -2]
     hours = sorted({datetime.fromtimestamp(m["t"] / 1000, LONDON).hour for m in bright})
